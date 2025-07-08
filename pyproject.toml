@@ -1,0 +1,10 @@
+[project]
+name = "dspygraph"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "dspy>=2.6.27",
+    "langgraph>=0.5.1",
+]
