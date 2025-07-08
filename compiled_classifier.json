@@ -1,68 +1,66 @@
 {
-  "classify": {
-    "traces": [],
-    "train": [],
-    "demos": [
-      {
-        "question": "What's the population of Tokyo?",
-        "category": "factual"
-      },
-      {
-        "question": "Define photosynthesis.",
-        "category": "factual"
-      },
-      {
-        "question": "Convert 10 miles to kilometers.",
-        "category": "tool_use"
-      },
-      {
-        "question": "Tell me a joke.",
-        "category": "creative"
-      },
-      {
-        "question": "Write a haiku about autumn leaves.",
-        "category": "creative"
-      },
-      {
-        "question": "What is 5 + 7?",
-        "category": "tool_use"
-      },
-      {
-        "question": "Calculate the square root of 64.",
-        "category": "tool_use"
-      },
-      {
-        "question": "Who won the World Cup in 2022?",
-        "category": "factual"
-      },
-      {
-        "question": "Summarize this article: https:\/\/example.com\/article",
-        "category": "unknown"
-      },
-      {
-        "question": "What's the current time?",
-        "category": "tool_use"
-      },
-      {
-        "question": "What is the capital of France?",
-        "category": "factual"
-      }
-    ],
-    "signature": {
-      "instructions": "Given the fields `question`, produce the fields `category`.",
-      "fields": [
-        {
-          "prefix": "Question:",
-          "description": "The user's question"
-        },
-        {
-          "prefix": "Category:",
-          "description": "The category of the question."
-        }
-      ]
+  "traces": [],
+  "train": [],
+  "demos": [
+    {
+      "question": "What's the population of Tokyo?",
+      "category": "factual"
     },
-    "lm": null
+    {
+      "question": "Define photosynthesis.",
+      "category": "factual"
+    },
+    {
+      "question": "Convert 10 miles to kilometers.",
+      "category": "tool_use"
+    },
+    {
+      "question": "Tell me a joke.",
+      "category": "creative"
+    },
+    {
+      "question": "Write a haiku about autumn leaves.",
+      "category": "creative"
+    },
+    {
+      "question": "What is 5 + 7?",
+      "category": "tool_use"
+    },
+    {
+      "question": "Calculate the square root of 64.",
+      "category": "tool_use"
+    },
+    {
+      "question": "Who won the World Cup in 2022?",
+      "category": "factual"
+    },
+    {
+      "question": "Summarize this article: https:\/\/example.com\/article",
+      "category": "unknown"
+    },
+    {
+      "question": "What's the current time?",
+      "category": "tool_use"
+    },
+    {
+      "question": "What is the capital of France?",
+      "category": "factual"
+    }
+  ],
+  "signature": {
+    "instructions": "Classifies a user's question into a specific category.",
+    "fields": [
+      {
+        "prefix": "Question:",
+        "description": "The user's question"
+      },
+      {
+        "prefix": "Category:",
+        "description": "Classification category of the question (e.g., 'factual', 'creative', 'tool_use', 'unknown')"
+      }
+    ]
   },
+  "lm": null,
   "metadata": {
     "dependency_versions": {
       "python": "3.11",

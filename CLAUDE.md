@@ -4,27 +4,43 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a DSPy + LangGraph integration project that demonstrates how to combine DSPy's intelligent modules with LangGraph's state management and routing capabilities. The system creates an agent that classifies user questions and routes them to appropriate specialized modules.
+This project demonstrates a clean architecture for integrating DSPy's intelligent modules with LangGraph's state management and routing capabilities. The system creates an intelligent agent that classifies user questions and routes them to appropriate specialized response modules.
 
-## Key Architecture Components
+## Architecture Design
 
-### DSPy Modules
-- **QuestionClassifier**: Classifies questions into categories ('factual', 'creative', 'tool_use', 'unknown')
-- **ToolUseModule**: Handles tool-based queries using DSPy's ReAct pattern
-- **FactualAnswerModule**: Provides factual answers using ChainOfThought
-- **CreativeResponseModule**: Generates creative responses
+### Framework vs Application Separation
 
-### LangGraph Integration
-- **AgentState**: TypedDict defining the workflow state (question, classification, response, tool_output)
-- **Workflow**: StateGraph that routes questions based on classification results
-- **Conditional Routing**: Routes to different modules based on question classification
+The codebase is organized with clean separation between reusable framework code and application-specific implementations:
+
+**Framework (`dspy_langgraph/`):**
+- `AgentNode` base class: Unified abstraction for DSPy modules + LangGraph nodes
+- `configure_dspy()`: Shared DSPy configuration utilities
+- Reusable across any DSPy + LangGraph project
+
+**Application (`question_classifier_app/`):**
+- Specific agent implementations (classifier, factual, creative, tool_use)
+- Application-specific types (`AgentState`, `QuestionCategory`)
+- Routing logic and compilation utilities
+- Training data and metrics
+
+### Key Components
+
+**Agent Implementations:**
+- `QuestionClassifier`: Classifies questions into categories ('factual', 'creative', 'tool_use', 'unknown')
+- `ToolUseModule`: Handles tool-based queries using DSPy's ReAct pattern
+- `FactualAnswerModule`: Provides factual answers using ChainOfThought
+- `CreativeResponseModule`: Generates creative responses
+
+**Workflow Management:**
+- `AgentState`: TypedDict defining workflow state (question, classification, response, tool_output)
+- `route_question()`: Conditional routing based on classification results
+- LangGraph StateGraph orchestrates the entire workflow
 
 ## Required Setup
 
 ### Model Configuration
-The system requires OpenAI API access. Configure your OpenAI API key in your environment:
-- Main system uses: `openai/gpt-4o-mini`
-- Compilation script uses: `openai/gpt-4.1-nano`
+The system requires OpenAI API access. Configure your OpenAI API key in your environment.
+- Uses: `openai/gpt-4o-mini` for both compilation and runtime
 
 ### Compiled Classifier
 The main application requires a compiled classifier. Run this before using the system:
@@ -33,15 +49,8 @@ python compile_classifier.py
 ```
 This creates `compiled_classifier.json` which is loaded by the main application.
 
-## Running the System
+## Development Commands
 
-### Basic Usage
-```bash
-python main.py
-```
-This runs predefined test cases for factual, tool use, and creative questions.
-
-### Development Commands
 ```bash
 # Compile the classifier (required first time)
 python compile_classifier.py
@@ -58,8 +67,32 @@ uv sync
 - `langgraph>=0.5.1`: State graph framework for workflow management
 - Python 3.11+ required
 
+## Code Structure
+
+```
+dspy_langgraph/                    # Reusable framework
+├── base.py                        # AgentNode base class
+└── config.py                      # DSPy configuration utilities
+
+question_classifier_app/           # Application-specific code
+├── types.py                       # AgentState and QuestionCategory
+├── routing.py                     # Route logic
+├── agents/                        # Agent implementations
+│   ├── classifier.py
+│   ├── factual.py
+│   ├── creative.py
+│   └── tool_use.py
+└── compilation/                   # Training data and metrics
+    ├── metrics.py
+    └── training.py
+
+main.py                           # Main application entry point
+compile_classifier.py             # Compilation script
+```
+
 ## Important Files
 - `main.py`: Main application entry point with agent workflow
 - `compile_classifier.py`: Compiles and optimizes the question classifier
 - `compiled_classifier.json`: Serialized compiled classifier (generated)
-- `pyproject.toml`: Project configuration and dependencies
+- `dspy_langgraph/`: Reusable framework for DSPy + LangGraph integration
+- `question_classifier_app/`: Application-specific implementations
