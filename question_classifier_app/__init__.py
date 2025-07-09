@@ -6,6 +6,7 @@ and route questions to appropriate response modules.
 """
 from .types import AgentState, QuestionCategory
 from .agents import QuestionClassifier, FactualAnswerModule, CreativeResponseModule, ToolUseModule
+from .graph import create_graph
 
 __all__ = [
     "AgentState",
@@ -13,5 +14,6 @@ __all__ = [
     "QuestionClassifier",
     "FactualAnswerModule",
     "CreativeResponseModule",
-    "ToolUseModule"
+    "ToolUseModule",
+    "create_graph"
 ]
