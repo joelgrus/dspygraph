@@ -4,6 +4,7 @@ Base AgentNode class for DSPy-LangGraph integration
 from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional, TypeVar, Generic, List
 import dspy
+from dspy.teleprompt import Teleprompter
 import os
 
 StateType = TypeVar('StateType')
@@ -56,13 +57,13 @@ class AgentNode(ABC, Generic[StateType]):
         """
         return self._process_state(state)
     
-    def compile(self, compiler: Any, trainset: List[dspy.Example], 
+    def compile(self, compiler: Teleprompter, trainset: List[dspy.Example], 
                 compile_path: Optional[str] = None) -> None:
         """
         Compile using the provided DSPy compiler and training data
         
         Args:
-            compiler: DSPy compiler instance (e.g., BootstrapFewShot)
+            compiler: DSPy teleprompter instance (e.g., BootstrapFewShot, MIPRO, COPRO)
             trainset: Training data for compilation
             compile_path: Optional path to save compiled model
         """
