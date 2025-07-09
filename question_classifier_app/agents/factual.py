@@ -9,8 +9,8 @@ from ..types import AgentState
 class FactualAnswerModule(AgentNode[AgentState]):
     """Agent that provides factual answers using chain of thought reasoning"""
     
-    def __init__(self, compile_path: str = "compiled_factual.json") -> None:
-        super().__init__(compile_path)
+    def __init__(self) -> None:
+        super().__init__()
     
     def _create_module(self) -> dspy.Module:
         return dspy.ChainOfThought("question -> answer")

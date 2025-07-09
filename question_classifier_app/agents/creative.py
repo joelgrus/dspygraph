@@ -14,8 +14,8 @@ class CreativeResponseSignature(dspy.Signature):
 class CreativeResponseModule(AgentNode[AgentState]):
     """Agent that generates creative responses"""
     
-    def __init__(self, compile_path: str = "compiled_creative.json") -> None:
-        super().__init__(compile_path)
+    def __init__(self) -> None:
+        super().__init__()
     
     def _create_module(self) -> dspy.Module:
         return dspy.ChainOfThought(CreativeResponseSignature)

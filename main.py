@@ -25,11 +25,10 @@ def main() -> None:
     
     # Load compiled models
     try:
-        classifier.load_compiled()
+        classifier.load_compiled("compiled_classifier.json")
         print("Compiled classifier loaded.")
-    except (FileNotFoundError, ValueError) as e:
-        print(f"Warning: {e}")
-        print("Run compilation script first: python compile_classifier.py")
+    except FileNotFoundError:
+        print("Compiled classifier not found. Run compilation script first: python compile_classifier.py")
         return
     
     # Build the LangGraph workflow

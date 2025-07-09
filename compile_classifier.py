@@ -17,18 +17,13 @@ def compile_classifier() -> None:
     # Create classifier instance
     classifier = QuestionClassifier()
     
-    # Get training data
+    # Get training data and create compiler
     trainset = get_training_data()
+    compiler = BootstrapFewShot(metric=classification_metric)
     
-    # Compile using BootstrapFewShot
-    compiled_classifier = BootstrapFewShot(metric=classification_metric).compile(
-        classifier.module,
-        trainset=trainset
-    )
-    
-    # Save compiled model
-    compiled_classifier.save(classifier.compile_path)
-    print(f"Compiled classifier saved to {classifier.compile_path}")
+    # Compile and save
+    classifier.compile(compiler, trainset, compile_path="compiled_classifier.json")
+    print("Compiled classifier saved to compiled_classifier.json")
 
 def main() -> None:
     """Main compilation entry point"""

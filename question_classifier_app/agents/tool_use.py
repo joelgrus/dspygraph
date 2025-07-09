@@ -9,8 +9,8 @@ from ..types import AgentState
 class ToolUseModule(AgentNode[AgentState]):
     """Agent that handles tool-based queries using ReAct pattern"""
     
-    def __init__(self, compile_path: str = "compiled_tool_use.json") -> None:
-        super().__init__(compile_path)
+    def __init__(self) -> None:
+        super().__init__()
     
     def _create_module(self) -> dspy.Module:
         return dspy.ReAct("query -> answer", tools=[self.dummy_tool])

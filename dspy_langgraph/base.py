@@ -2,7 +2,7 @@
 Base AgentNode class for DSPy-LangGraph integration
 """
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional, TypeVar, Generic
+from typing import Dict, Any, Optional, TypeVar, Generic, List
 import dspy
 import os
 
@@ -16,15 +16,9 @@ class AgentNode(ABC, Generic[StateType]):
     seamlessly with both DSPy's module system and LangGraph's state management.
     """
     
-    def __init__(self, compile_path: Optional[str] = None) -> None:
-        """
-        Initialize the agent node
-        
-        Args:
-            compile_path: Optional path to load/save compiled model
-        """
+    def __init__(self) -> None:
+        """Initialize the agent node"""
         self.module = self._create_module()
-        self.compile_path = compile_path
         self._is_compiled = False
         
     @abstractmethod
@@ -62,41 +56,46 @@ class AgentNode(ABC, Generic[StateType]):
         """
         return self._process_state(state)
     
-    def load_compiled(self, path: Optional[str] = None) -> None:
+    def compile(self, compiler: Any, trainset: List[dspy.Example], 
+                compile_path: Optional[str] = None) -> None:
         """
-        Load a compiled version of the module
+        Compile using the provided DSPy compiler and training data
         
         Args:
-            path: Optional path to load from, defaults to compile_path
+            compiler: DSPy compiler instance (e.g., BootstrapFewShot)
+            trainset: Training data for compilation
+            compile_path: Optional path to save compiled model
+        """
+        compiled_module = compiler.compile(self.module, trainset=trainset)
+        self.module = compiled_module
+        self._is_compiled = True
+        if compile_path:
+            self.save_compiled(compile_path)
+    
+    def load_compiled(self, path: str) -> None:
+        """
+        Load a compiled module from file
+        
+        Args:
+            path: Path to the compiled module file
             
         Raises:
-            ValueError: If no path is provided
             FileNotFoundError: If the compiled file doesn't exist
         """
-        load_path = path or self.compile_path
-        if not load_path:
-            raise ValueError("No compile path provided")
-        if not os.path.exists(load_path):
-            raise FileNotFoundError(f"Compiled module not found at {load_path}")
+        if not os.path.exists(path):
+            raise FileNotFoundError(f"Compiled module not found at {path}")
         
-        self.module.load(load_path)
+        self.module.load(path)
         self._is_compiled = True
         
-    def save_compiled(self, path: Optional[str] = None) -> None:
+    def save_compiled(self, path: str) -> None:
         """
-        Save the compiled module
+        Save the compiled module to file
         
         Args:
-            path: Optional path to save to, defaults to compile_path
-            
-        Raises:
-            ValueError: If no path is provided
+            path: Path to save the compiled module
         """
-        save_path = path or self.compile_path
-        if not save_path:
-            raise ValueError("No compile path provided")
-        
-        self.module.save(save_path)
+        self.module.save(path)
         
     @property
     def is_compiled(self) -> bool:

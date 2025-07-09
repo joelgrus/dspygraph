@@ -16,8 +16,8 @@ class QuestionClassificationSignature(dspy.Signature):
 class QuestionClassifier(AgentNode[AgentState]):
     """Agent that classifies questions into categories"""
     
-    def __init__(self, compile_path: str = "compiled_classifier.json") -> None:
-        super().__init__(compile_path)
+    def __init__(self) -> None:
+        super().__init__()
     
     def _create_module(self) -> dspy.Module:
         return dspy.Predict(QuestionClassificationSignature)

@@ -12,29 +12,34 @@ This project demonstrates a clean architecture for integrating DSPy's intelligen
 
 The codebase is organized with clean separation between reusable framework code and application-specific implementations:
 
-**Framework (`dspy_langgraph/`):**
-- `AgentNode` base class: Unified abstraction for DSPy modules + LangGraph nodes
-- `configure_dspy()`: Shared DSPy configuration utilities
+**Framework (dspy_langgraph/):**
+- AgentNode base class: Unified abstraction for DSPy modules + LangGraph nodes
+- configure_dspy(): Shared DSPy configuration utilities
 - Reusable across any DSPy + LangGraph project
 
-**Application (`question_classifier_app/`):**
+**Application (question_classifier_app/):**
 - Specific agent implementations (classifier, factual, creative, tool_use)
-- Application-specific types (`AgentState`, `QuestionCategory`)
+- Application-specific types (AgentState, QuestionCategory)
 - Routing logic and compilation utilities
 - Training data and metrics
 
 ### Key Components
 
 **Agent Implementations:**
-- `QuestionClassifier`: Classifies questions into categories ('factual', 'creative', 'tool_use', 'unknown')
-- `ToolUseModule`: Handles tool-based queries using DSPy's ReAct pattern
-- `FactualAnswerModule`: Provides factual answers using ChainOfThought
-- `CreativeResponseModule`: Generates creative responses
+- QuestionClassifier: Classifies questions into categories ('factual', 'creative', 'tool_use', 'unknown')
+- ToolUseModule: Handles tool-based queries using DSPy's ReAct pattern
+- FactualAnswerModule: Provides factual answers using ChainOfThought
+- CreativeResponseModule: Generates creative responses
 
 **Workflow Management:**
-- `AgentState`: TypedDict defining workflow state (question, classification, response, tool_output)
-- `route_question()`: Conditional routing based on classification results
+- AgentState: TypedDict defining workflow state (question, classification, response, tool_output)
+- route_question(): Conditional routing based on classification results
 - LangGraph StateGraph orchestrates the entire workflow
+
+**Compilation API:**
+- agent.compile(compiler, trainset, compile_path=None): Compile agent with DSPy compiler
+- agent.load_compiled(path): Load pre-compiled agent from file
+- agent.save_compiled(path): Save compiled agent to file
 
 ## Required Setup
 
@@ -47,7 +52,14 @@ The main application requires a compiled classifier. Run this before using the s
 ```bash
 python compile_classifier.py
 ```
-This creates `compiled_classifier.json` which is loaded by the main application.
+This creates compiled_classifier.json which is loaded by the main application.
+
+### Compilation Process
+The compilation process uses DSPy's optimization system:
+1. Create agent instance: classifier = QuestionClassifier()
+2. Get training data: trainset = get_training_data()
+3. Create compiler: compiler = BootstrapFewShot(metric=classification_metric)
+4. Compile: classifier.compile(compiler, trainset, compile_path="compiled_classifier.json")
 
 ## Development Commands
 
@@ -91,8 +103,28 @@ compile_classifier.py             # Compilation script
 ```
 
 ## Important Files
-- `main.py`: Main application entry point with agent workflow
-- `compile_classifier.py`: Compiles and optimizes the question classifier
-- `compiled_classifier.json`: Serialized compiled classifier (generated)
-- `dspy_langgraph/`: Reusable framework for DSPy + LangGraph integration
-- `question_classifier_app/`: Application-specific implementations
+- main.py: Main application entry point with agent workflow
+- compile_classifier.py: Compiles and optimizes the question classifier
+- compiled_classifier.json: Serialized compiled classifier (generated)
+- dspy_langgraph/: Reusable framework for DSPy + LangGraph integration
+- question_classifier_app/: Application-specific implementations
+
+## Usage Examples
+
+### Manual Compilation
+```python
+from dspy.teleprompt import BootstrapFewShot
+from question_classifier_app import QuestionClassifier
+from question_classifier_app.compilation import classification_metric, get_training_data
+
+classifier = QuestionClassifier()
+trainset = get_training_data()
+compiler = BootstrapFewShot(metric=classification_metric)
+classifier.compile(compiler, trainset, compile_path="my_classifier.json")
+```
+
+### Loading Compiled Agent
+```python
+classifier = QuestionClassifier()
+classifier.load_compiled("compiled_classifier.json")
+```

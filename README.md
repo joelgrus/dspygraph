@@ -31,8 +31,8 @@ Question: "What is 15 x 24?"
 ## Key Features
 
 ### Clean Architecture
-- **Reusable Framework**: `dspy_langgraph/` provides a base `AgentNode` class that can be used for any DSPy + LangGraph project
-- **Application-Specific Code**: `question_classifier_app/` contains the specific implementations for this question-answering system
+- **Reusable Framework**: dspy_langgraph/ provides a base AgentNode class that can be used for any DSPy + LangGraph project
+- **Application-Specific Code**: question_classifier_app/ contains the specific implementations for this question-answering system
 - **Clear Separation**: Framework concerns are separated from application logic
 
 ### Intelligent Routing
@@ -44,6 +44,7 @@ Question: "What is 15 x 24?"
 - Compiled models for optimized performance
 - Proper error handling and validation
 - Type safety with comprehensive type annotations
+- Clean compilation API with explicit paths
 
 ## Quick Start
 
@@ -92,20 +93,40 @@ User Question -> QuestionClassifier -> Router -> Specialized Module -> Response
 
 The project showcases a reusable pattern for DSPy + LangGraph integration:
 
-- **`AgentNode`**: Base class that unifies DSPy modules with LangGraph nodes
+- **AgentNode**: Base class that unifies DSPy modules with LangGraph nodes
 - **Clean Interfaces**: Each agent implements both DSPy module creation and LangGraph state processing
 - **Compilation Support**: Built-in support for DSPy's optimization system
+
+### Compilation API
+
+The framework provides a clean API for compiling agents:
+
+```python
+# Create agent and compiler
+agent = QuestionClassifier()
+compiler = BootstrapFewShot(metric=classification_metric)
+trainset = get_training_data()
+
+# Compile with optional save path
+agent.compile(compiler, trainset, compile_path="my_model.json")
+
+# Load compiled model
+agent.load_compiled("my_model.json")
+
+# Save compiled model
+agent.save_compiled("my_model.json")
+```
 
 ## Extending the System
 
 ### Adding New Question Types
-1. Create a new agent in `question_classifier_app/agents/`
-2. Add the new category to `QuestionCategory` type
+1. Create a new agent in question_classifier_app/agents/
+2. Add the new category to QuestionCategory type
 3. Update training data and routing logic
 4. Recompile the classifier
 
 ### Creating New Applications
-The `dspy_langgraph/` framework can be reused for entirely different applications:
+The dspy_langgraph/ framework can be reused for entirely different applications:
 
 ```python
 from dspy_langgraph import AgentNode, configure_dspy
