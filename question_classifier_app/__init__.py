@@ -6,7 +6,6 @@ and route questions to appropriate response modules.
 """
 from .types import AgentState, QuestionCategory
 from .agents import QuestionClassifier, FactualAnswerModule, CreativeResponseModule, ToolUseModule
-from .routing import route_question
 
 __all__ = [
     "AgentState",
@@ -14,6 +13,5 @@ __all__ = [
     "QuestionClassifier",
     "FactualAnswerModule",
     "CreativeResponseModule",
-    "ToolUseModule",
-    "route_question"
+    "ToolUseModule"
 ]
