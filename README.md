@@ -31,7 +31,7 @@ Question: "What is 15 x 24?"
 ## Key Features
 
 ### Clean Architecture
-- **Reusable Framework**: dspy_langgraph/ provides a base AgentNode class that can be used for any DSPy + LangGraph project
+- **Reusable Framework**: dspygraph/ provides a base AgentNode class that can be used for any DSPy project
 - **Application-Specific Code**: question_classifier_app/ contains the specific implementations for this question-answering system
 - **Clear Separation**: Framework concerns are separated from application logic
 
@@ -136,10 +136,10 @@ agent.save_compiled("my_model.json")
 4. Recompile the classifier
 
 ### Creating New Applications
-The dspy_langgraph/ framework can be reused for entirely different applications:
+The dspygraph/ framework can be reused for entirely different applications:
 
 ```python
-from dspy_langgraph import AgentNode, configure_dspy
+from dspygraph import AgentNode, configure_dspy
 
 class MyCustomAgent(AgentNode[MyState]):
     def _create_module(self):
@@ -159,7 +159,7 @@ class MyCustomAgent(AgentNode[MyState]):
 
 ### Project Structure
 ```
-dspy_langgraph/                    # Reusable framework
+dspygraph/                         # Reusable framework
 ├── base.py                        # AgentNode base class
 ├── config.py                      # DSPy configuration
 └── constants.py                   # Framework constants

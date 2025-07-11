@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """
-Compilation script for the question classifier
+Compilation script for the question classifier using graph nodes
 """
 import dspy
 from dspy.teleprompt import BootstrapFewShot
-from typing import Any, Optional, List
-from dspy_langgraph import configure_dspy
-from dspy_langgraph.constants import DEFAULT_MODEL
-from . import QuestionClassifier
+from typing import Any, Optional
+from .nodes import QuestionClassifierNode
+
 
 def classification_metric(pred_object: Any, true_category_str: str, trace: Optional[Any] = None) -> bool:
     """Metric for evaluating question classification accuracy"""
     return pred_object.category == true_category_str
+
 
 TRAINING_DATA = [
     ("What is the capital of France?", "factual"),
@@ -27,15 +27,17 @@ TRAINING_DATA = [
     ("What's the current time?", "tool_use"),
 ]
 
+
 def compile_classifier() -> None:
-    """Compile the question classifier"""
-    print("Compiling QuestionClassifier...")
+    """Compile the question classifier node"""
+    print("Compiling QuestionClassifier node...")
     
     # Configure DSPy for compilation
-    configure_dspy(DEFAULT_MODEL)
+    lm = dspy.LM("openai/gpt-4o-mini")
+    dspy.configure(lm=lm)
     
-    # Create classifier instance
-    classifier = QuestionClassifier()
+    # Create classifier node
+    classifier = QuestionClassifierNode("classifier")
     
     # Convert training data to DSPy Examples
     trainset = [
@@ -48,11 +50,13 @@ def compile_classifier() -> None:
     classifier.compile(compiler, trainset, compile_path="compiled_classifier.json")
     print("Compiled classifier saved to compiled_classifier.json")
 
+
 def main() -> None:
     """Main compilation entry point"""
-    print("Starting agent compilation...")
+    print("Starting classifier node compilation...")
     compile_classifier()
     print("Compilation complete!")
+
 
 if __name__ == "__main__":
     main()

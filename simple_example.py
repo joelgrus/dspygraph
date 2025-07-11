@@ -1,19 +1,9 @@
 #!/usr/bin/env python3
 """
-Simple example demonstrating DSPy-LangGraph integration
-
-This example shows how to create a basic agent using the framework.
+Simple example demonstrating pure DSPy usage
 """
 import dspy
-from typing import Dict, Any
-from dspy_langgraph import AgentNode, configure_dspy
-from langgraph.graph import StateGraph, START, END
-
-
-class SimpleState(dict):
-    """Simple state type for demonstration"""
-    question: str
-    answer: str
+import os
 
 
 class SimpleAnswerSignature(dspy.Signature):
@@ -22,39 +12,26 @@ class SimpleAnswerSignature(dspy.Signature):
     answer: str = dspy.OutputField(desc="A helpful answer to the question")
 
 
-class SimpleAgent(AgentNode[SimpleState]):
+class SimpleAgent:
     """A simple agent that answers questions"""
     
-    def _create_module(self) -> dspy.Module:
-        return dspy.Predict(SimpleAnswerSignature)
+    def __init__(self):
+        self.module = dspy.Predict(SimpleAnswerSignature)
     
-    def _process_state(self, state: SimpleState) -> Dict[str, Any]:
-        question = state["question"]
+    def run(self, question: str) -> str:
+        """Process a question and return an answer"""
         prediction = self.module(question=question)
-        return {"answer": prediction.answer}
-
-
-def create_simple_graph():
-    """Create a simple graph with one agent"""
-    # Create the agent
-    agent = SimpleAgent()
-    
-    # Create the graph
-    graph = StateGraph(SimpleState)
-    graph.add_node("answer", agent)
-    graph.add_edge(START, "answer")
-    graph.add_edge("answer", END)
-    
-    return graph.compile()
+        return prediction.answer
 
 
 def main():
     """Run the simple example"""
-    # Configure DSPy
-    configure_dspy()
+    # Configure DSPy directly
+    lm = dspy.LM("openai/gpt-4o-mini")
+    dspy.configure(lm=lm)
     
-    # Create the application
-    app = create_simple_graph()
+    # Create the agent
+    agent = SimpleAgent()
     
     # Test questions
     questions = [
@@ -65,8 +42,8 @@ def main():
     
     for question in questions:
         print(f"\n🤔 Question: {question}")
-        result = app.invoke({"question": question})
-        print(f"💡 Answer: {result['answer']}")
+        answer = agent.run(question)
+        print(f"💡 Answer: {answer}")
 
 
 if __name__ == "__main__":

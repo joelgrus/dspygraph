@@ -1,19 +1,18 @@
 """
 Question Classifier Application
 
-A specific implementation using the dspy-langgraph framework to classify
-and route questions to appropriate response modules.
+A DSPy graph-based workflow for classifying and routing questions to appropriate response modules.
 """
 from .types import AgentState, QuestionCategory
-from .agents import QuestionClassifier, FactualAnswerModule, CreativeResponseModule, ToolUseModule
-from .graph import create_graph
+from .nodes import QuestionClassifierNode, FactualAnswerNode, CreativeResponseNode, ToolUseNode
+from .workflow import create_question_classifier_workflow
 
 __all__ = [
     "AgentState",
     "QuestionCategory", 
-    "QuestionClassifier",
-    "FactualAnswerModule",
-    "CreativeResponseModule",
-    "ToolUseModule",
-    "create_graph"
+    "QuestionClassifierNode",
+    "FactualAnswerNode",
+    "CreativeResponseNode", 
+    "ToolUseNode",
+    "create_question_classifier_workflow"
 ]

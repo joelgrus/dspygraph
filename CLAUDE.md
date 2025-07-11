@@ -12,10 +12,10 @@ This project demonstrates a clean architecture for integrating DSPy's intelligen
 
 The codebase is organized with clean separation between reusable framework code and application-specific implementations:
 
-**Framework (dspy_langgraph/):**
-- AgentNode base class: Unified abstraction for DSPy modules + LangGraph nodes
+**Framework (dspygraph/):**
+- AgentNode base class: Unified abstraction for DSPy modules
 - configure_dspy(): Shared DSPy configuration utilities
-- Reusable across any DSPy + LangGraph project
+- Reusable across any DSPy project
 
 **Application (examples/question_classifier_app/):**
 - Specific agent implementations (classifier, factual, creative, tool_use)
@@ -33,8 +33,8 @@ The codebase is organized with clean separation between reusable framework code 
 
 **Workflow Management:**
 - AgentState: TypedDict defining workflow state (question, classification, response, tool_output)
-- route_question(): Conditional routing based on classification results
-- LangGraph StateGraph orchestrates the entire workflow
+- QuestionClassifierWorkflow: Manual workflow implementation with routing logic
+- Workflow orchestrates the entire process without external dependencies
 
 **Compilation API:**
 - agent.compile(compiler, trainset, compile_path=None): Compile agent with DSPy compiler
@@ -45,7 +45,7 @@ The codebase is organized with clean separation between reusable framework code 
 
 ### Model Configuration
 The system requires OpenAI API access. Configure your OpenAI API key in your environment.
-- Uses: `openai/gpt-4o-mini` for both compilation and runtime (configured in `dspy_langgraph/constants.py`)
+- Uses: `openai/gpt-4o-mini` for both compilation and runtime (configured in `dspygraph/constants.py`)
 
 ### Compiled Classifier
 The main application requires a compiled classifier. Run this before using the system:
@@ -84,7 +84,7 @@ python main.py
 ## Code Structure
 
 ```
-dspy_langgraph/                    # Reusable framework
+dspygraph/                         # Reusable framework
 ├── base.py                        # AgentNode base class
 ├── config.py                      # DSPy configuration utilities
 └── constants.py                   # Framework constants
@@ -109,7 +109,7 @@ examples/                          # Example applications
 - examples/question_classifier_app/main.py: Main application entry point with agent workflow
 - examples/question_classifier_app/compile_classifier.py: Compiles and optimizes the question classifier
 - examples/question_classifier_app/compiled_classifier.json: Serialized compiled classifier (generated)
-- dspy_langgraph/: Reusable framework for DSPy + LangGraph integration
+- dspygraph/: Reusable framework for DSPy integration
 - examples/question_classifier_app/: Application-specific implementations
 
 ## Usage Examples
