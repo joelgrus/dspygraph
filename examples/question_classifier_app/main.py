@@ -2,7 +2,7 @@
 Main application entry point
 """
 from dspy_langgraph import configure_dspy
-from question_classifier_app import create_graph
+from . import create_graph
 
 def main() -> None:
     """Main application entry point"""

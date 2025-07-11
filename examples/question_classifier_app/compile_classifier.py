@@ -6,7 +6,8 @@ import dspy
 from dspy.teleprompt import BootstrapFewShot
 from typing import Any, Optional, List
 from dspy_langgraph import configure_dspy
-from question_classifier_app import QuestionClassifier
+from dspy_langgraph.constants import DEFAULT_MODEL
+from . import QuestionClassifier
 
 def classification_metric(pred_object: Any, true_category_str: str, trace: Optional[Any] = None) -> bool:
     """Metric for evaluating question classification accuracy"""
@@ -31,7 +32,7 @@ def compile_classifier() -> None:
     print("Compiling QuestionClassifier...")
     
     # Configure DSPy for compilation
-    configure_dspy("openai/gpt-4o-mini")  # Use same model as main app
+    configure_dspy(DEFAULT_MODEL)
     
     # Create classifier instance
     classifier = QuestionClassifier()

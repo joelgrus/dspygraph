@@ -4,9 +4,10 @@ DSPy configuration utilities
 import dspy
 from functools import lru_cache
 from typing import Optional
+from .constants import DEFAULT_MODEL
 
 @lru_cache(maxsize=1)
-def get_lm(model_name: str = "openai/gpt-4o-mini") -> dspy.LM:
+def get_lm(model_name: str = DEFAULT_MODEL) -> dspy.LM:
     """
     Get and configure the language model for DSPy
     
@@ -20,7 +21,7 @@ def get_lm(model_name: str = "openai/gpt-4o-mini") -> dspy.LM:
     dspy.configure(lm=lm)
     return lm
 
-def configure_dspy(model_name: str = "openai/gpt-4o-mini") -> None:
+def configure_dspy(model_name: str = DEFAULT_MODEL) -> None:
     """
     Configure DSPy with the specified model
     

@@ -62,16 +62,26 @@ cd dspygraph
 uv sync
 ```
 
-### Running the System
-```bash
-# 1. Compile the classifier (required first time)
-python compile_classifier.py
+### Running the Examples
 
-# 2. Run the main application
-python main.py
+#### Simple Example (Quick Start)
+```bash
+# Run the basic example (no compilation needed)
+python simple_example.py
 ```
 
-The system will run through example questions and show how each one is classified and routed.
+This shows basic DSPy-LangGraph integration with a single agent that answers questions.
+
+#### Question Classifier App (Advanced Example)
+```bash
+# 1. Compile the classifier (required first time)
+python -m examples.question_classifier_app.compile_classifier
+
+# 2. Run the main application
+python -m examples.question_classifier_app.main
+```
+
+This demonstrates an intelligent routing system that classifies questions and routes them to specialized response modules.
 
 ## How It Works
 
@@ -151,15 +161,18 @@ class MyCustomAgent(AgentNode[MyState]):
 ```
 dspy_langgraph/                    # Reusable framework
 ├── base.py                        # AgentNode base class
-└── config.py                      # DSPy configuration
+├── config.py                      # DSPy configuration
+└── constants.py                   # Framework constants
 
-question_classifier_app/           # Application code
-├── agents/                        # Agent implementations
-├── compilation/                   # Training & metrics
-└── types.py                       # Application types
+examples/                          # Example applications
+└── question_classifier_app/       # Question classifier example
+    ├── main.py                    # Main application entry point
+    ├── compile_classifier.py      # Compilation script
+    ├── agents/                    # Agent implementations
+    ├── compilation/               # Training & metrics
+    └── types.py                   # Application types
 
-main.py                           # Application entry point
-compile_classifier.py             # Model compilation
+simple_example.py                  # Basic framework demo
 ```
 
 ## Contributing

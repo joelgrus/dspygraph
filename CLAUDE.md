@@ -17,7 +17,7 @@ The codebase is organized with clean separation between reusable framework code 
 - configure_dspy(): Shared DSPy configuration utilities
 - Reusable across any DSPy + LangGraph project
 
-**Application (question_classifier_app/):**
+**Application (examples/question_classifier_app/):**
 - Specific agent implementations (classifier, factual, creative, tool_use)
 - Application-specific types (AgentState, QuestionCategory)
 - Routing logic and compilation utilities
@@ -45,11 +45,12 @@ The codebase is organized with clean separation between reusable framework code 
 
 ### Model Configuration
 The system requires OpenAI API access. Configure your OpenAI API key in your environment.
-- Uses: `openai/gpt-4o-mini` for both compilation and runtime
+- Uses: `openai/gpt-4o-mini` for both compilation and runtime (configured in `dspy_langgraph/constants.py`)
 
 ### Compiled Classifier
 The main application requires a compiled classifier. Run this before using the system:
 ```bash
+cd examples/question_classifier_app
 python compile_classifier.py
 ```
 This creates compiled_classifier.json which is loaded by the main application.
@@ -64,14 +65,15 @@ The compilation process uses DSPy's optimization system:
 ## Development Commands
 
 ```bash
+# Install dependencies
+uv sync
+
 # Compile the classifier (required first time)
+cd examples/question_classifier_app
 python compile_classifier.py
 
 # Run the main application
 python main.py
-
-# Install dependencies
-uv sync
 ```
 
 ## Dependencies
@@ -84,38 +86,39 @@ uv sync
 ```
 dspy_langgraph/                    # Reusable framework
 ├── base.py                        # AgentNode base class
-└── config.py                      # DSPy configuration utilities
+├── config.py                      # DSPy configuration utilities
+└── constants.py                   # Framework constants
 
-question_classifier_app/           # Application-specific code
-├── types.py                       # AgentState and QuestionCategory
-├── routing.py                     # Route logic
-├── agents/                        # Agent implementations
-│   ├── classifier.py
-│   ├── factual.py
-│   ├── creative.py
-│   └── tool_use.py
-└── compilation/                   # Training data and metrics
-    ├── metrics.py
-    └── training.py
-
-main.py                           # Main application entry point
-compile_classifier.py             # Compilation script
+examples/                          # Example applications
+└── question_classifier_app/       # Question classifier example
+    ├── main.py                    # Main application entry point
+    ├── compile_classifier.py      # Compilation script
+    ├── types.py                   # AgentState and QuestionCategory
+    ├── routing.py                 # Route logic
+    ├── agents/                    # Agent implementations
+    │   ├── classifier.py
+    │   ├── factual.py
+    │   ├── creative.py
+    │   └── tool_use.py
+    └── compilation/               # Training data and metrics
+        ├── metrics.py
+        └── training.py
 ```
 
 ## Important Files
-- main.py: Main application entry point with agent workflow
-- compile_classifier.py: Compiles and optimizes the question classifier
-- compiled_classifier.json: Serialized compiled classifier (generated)
+- examples/question_classifier_app/main.py: Main application entry point with agent workflow
+- examples/question_classifier_app/compile_classifier.py: Compiles and optimizes the question classifier
+- examples/question_classifier_app/compiled_classifier.json: Serialized compiled classifier (generated)
 - dspy_langgraph/: Reusable framework for DSPy + LangGraph integration
-- question_classifier_app/: Application-specific implementations
+- examples/question_classifier_app/: Application-specific implementations
 
 ## Usage Examples
 
 ### Manual Compilation
 ```python
 from dspy.teleprompt import BootstrapFewShot
-from question_classifier_app import QuestionClassifier
-from question_classifier_app.compilation import classification_metric, get_training_data
+from examples.question_classifier_app import QuestionClassifier
+from examples.question_classifier_app.compilation import classification_metric, get_training_data
 
 classifier = QuestionClassifier()
 trainset = get_training_data()
