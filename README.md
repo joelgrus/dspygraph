@@ -83,6 +83,17 @@ python -m examples.question_classifier_app.main
 
 This demonstrates an intelligent routing system that classifies questions and routes them to specialized response modules.
 
+#### React Agent (Tool Integration Example)
+```bash
+# Run the React agent (no compilation needed)
+python -m examples.react_agent.main
+
+# Or run the demonstration
+python -m examples.react_agent.workflow
+```
+
+This showcases a ReAct (Reasoning + Acting) agent that uses iterative reasoning with tool execution, demonstrating graph-based loops and state management.
+
 ## How It Works
 
 ### Architecture Overview
@@ -165,12 +176,18 @@ dspygraph/                         # Reusable framework
 └── constants.py                   # Framework constants
 
 examples/                          # Example applications
-└── question_classifier_app/       # Question classifier example
-    ├── main.py                    # Main application entry point
-    ├── compile_classifier.py      # Compilation script
-    ├── agents/                    # Agent implementations
-    ├── compilation/               # Training & metrics
-    └── types.py                   # Application types
+├── question_classifier_app/       # Question classifier example
+│   ├── main.py                    # Main application entry point
+│   ├── compile_classifier.py      # Compilation script
+│   ├── workflow.py                # Graph workflow definition
+│   ├── nodes.py                   # Node implementations
+│   └── types.py                   # Application types
+└── react_agent/                   # React agent with tools example
+    ├── main.py                    # Interactive React agent
+    ├── workflow.py                # Graph workflow with reasoning loops
+    ├── nodes.py                   # React agent and tool executor nodes
+    ├── tools.py                   # Calculator and search tools
+    └── types.py                   # State and result types
 
 simple_example.py                  # Basic framework demo
 ```

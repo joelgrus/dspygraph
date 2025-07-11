@@ -155,8 +155,8 @@ class TestErrorConditions:
             with pytest.raises(AttributeError):
                 graph.run(input="test")
     
-    def test_circular_dependency_detection(self):
-        """Test detection of circular dependencies"""
+    def test_infinite_loop_protection(self):
+        """Test protection against infinite loops in cycles"""
         graph = Graph("test")
         node1 = DeadlockNode("node1")
         node2 = DeadlockNode("node2")
@@ -167,7 +167,7 @@ class TestErrorConditions:
             graph.add_node(node2)
             graph.add_node(node3)
             
-            # Create circular dependency
+            # Create circular dependency - now allowed!
             graph.add_edge(START, "node1")
             graph.add_edge("node1", "node2")
             graph.add_edge("node2", "node3")
@@ -179,8 +179,14 @@ class TestErrorConditions:
             mock_track.return_value.__enter__.return_value = mock_usage
             mock_track.return_value.__exit__.return_value = None
             
-            with pytest.raises(ValueError, match="contains cycles"):
-                graph.run(input="test")
+            # Should complete but hit max iterations protection
+            result = graph.run(input="test", max_iterations=5, max_node_executions=3)
+            
+            # Verify loop protection worked
+            metadata = result["_graph_metadata"]
+            assert metadata["total_iterations"] >= 5  # Should hit max iterations (may be off by one)
+            assert "stopped_reason" in metadata  # Should indicate why it stopped
+            assert metadata["stopped_reason"].startswith("max_iterations_reached")
     
     def test_conditional_edge_with_invalid_router(self):
         """Test conditional edges with router that raises exceptions"""

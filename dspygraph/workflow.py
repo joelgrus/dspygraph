@@ -90,12 +90,16 @@ class Graph:
             self.add_edge(from_node, to_node, condition)
         return self
     
-    def _get_ready_nodes(self, completed: Set[str], state: Dict[str, Any]) -> List[str]:
+    def _get_ready_nodes(self, completed: Set[str], state: Dict[str, Any], executed_this_iteration: Set[str] = None) -> List[str]:
         """Get nodes that are ready to execute (all dependencies met and conditions satisfied)"""
+        if executed_this_iteration is None:
+            executed_this_iteration = set()
+            
         ready = []
         
         for node_name in self.nodes:
-            if node_name in completed:
+            # Don't execute a node twice in the same iteration
+            if node_name in executed_this_iteration:
                 continue
                 
             # Check if this node has any incoming edges (including from START)
@@ -103,16 +107,27 @@ class Graph:
             
             if not incoming_edges:
                 # Legacy: This is a start node (no incoming edges) - keep for backwards compatibility
-                if node_name in self.start_nodes:
+                if node_name in self.start_nodes and node_name not in completed:
                     ready.append(node_name)
             else:
                 # Check if any incoming edge is satisfied
+                node_ready = False
                 for from_node, condition in incoming_edges:
                     # Handle START specially - it's always "completed"
-                    if from_node == START or from_node in completed:
+                    if from_node == START:
                         if condition is None or condition(state):
-                            ready.append(node_name)
-                            break  # Only need one satisfied edge
+                            # Only run START edges if node hasn't been completed yet
+                            if node_name not in completed:
+                                node_ready = True
+                                break
+                    elif from_node in completed:
+                        if condition is None or condition(state):
+                            # For cycles: node can run again if dependency has been satisfied
+                            node_ready = True
+                            break
+                
+                if node_ready:
+                    ready.append(node_name)
                 
         return ready
     
@@ -123,36 +138,14 @@ class Graph:
             
         if not self.start_nodes and self.edges:
             raise ValueError("Graph has edges but no start nodes defined")
-            
-        # Check for cycles (simple detection)
-        visited = set()
-        rec_stack = set()
-        
-        def has_cycle(node: str) -> bool:
-            visited.add(node)
-            rec_stack.add(node)
-            
-            for from_node, to_node, _ in self.edges:
-                if from_node == node:
-                    if to_node not in visited:
-                        if has_cycle(to_node):
-                            return True
-                    elif to_node in rec_stack:
-                        return True
-            
-            rec_stack.remove(node)
-            return False
-        
-        for node_name in self.nodes:
-            if node_name not in visited:
-                if has_cycle(node_name):
-                    raise ValueError("Graph contains cycles")
     
-    def run(self, **initial_state) -> Dict[str, Any]:
+    def run(self, max_iterations: int = 100, max_node_executions: int = 10, **initial_state) -> Dict[str, Any]:
         """
         Execute the graph
         
         Args:
+            max_iterations: Maximum total iterations before stopping (default: 100)
+            max_node_executions: Maximum executions per node before warning (default: 10)
             **initial_state: Initial state values
             
         Returns:
@@ -180,6 +173,9 @@ class Graph:
             completed = set()
             node_execution_order = []
             total_usage = defaultdict(int)
+            node_execution_counts = defaultdict(int)  # Track executions per node
+            iteration_count = 0  # Track total iterations
+            nodes_executed_this_iteration = set()  # Track nodes executed in current iteration
             
             # Track graph metadata
             state["_graph_metadata"] = {
@@ -192,7 +188,19 @@ class Graph:
             
             # Main execution loop
             while True:
-                ready_nodes = self._get_ready_nodes(completed, state)
+                iteration_count += 1
+                
+                # Check max iterations
+                if iteration_count > max_iterations:
+                    print(f"\n[{self.name}] WARNING: Reached maximum iterations ({max_iterations})")
+                    print(f"[{self.name}] Stopping execution to prevent infinite loop")
+                    state["_graph_metadata"]["stopped_reason"] = f"max_iterations_reached ({max_iterations})"
+                    break
+                
+                # Reset per-iteration tracking
+                nodes_executed_this_iteration = set()
+                
+                ready_nodes = self._get_ready_nodes(completed, state, nodes_executed_this_iteration)
                 
                 if not ready_nodes:
                     # No more nodes ready - check if this is expected
@@ -212,6 +220,14 @@ class Graph:
                 # Execute ready nodes (could be parallelized here)
                 for node_name in ready_nodes:
                     node = self.nodes[node_name]
+                    
+                    # Track executions
+                    node_execution_counts[node_name] += 1
+                    nodes_executed_this_iteration.add(node_name)
+                    
+                    if node_execution_counts[node_name] > max_node_executions:
+                        print(f"\n[{self.name}] WARNING: Node '{node_name}' has been executed {node_execution_counts[node_name]} times")
+                        print(f"[{self.name}] This may indicate an infinite loop in your graph logic")
                     
                     try:
                         # Execute node with full observability
@@ -244,7 +260,9 @@ class Graph:
                 "execution_time": execution_time,
                 "total_usage": dict(total_usage),
                 "nodes_executed": len(completed),
-                "success": True
+                "success": True,
+                "total_iterations": iteration_count,
+                "node_execution_counts": dict(node_execution_counts)
             })
             
             print(f"\n{'='*60}")
