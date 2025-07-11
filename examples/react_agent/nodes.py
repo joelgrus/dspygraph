@@ -14,14 +14,31 @@ class ReactReasoningSignature(dspy.Signature):
     question: str = dspy.InputField(desc="The question to solve")
     previous_steps: str = dspy.InputField(desc="Previous thoughts, actions, and observations")
     thought: str = dspy.OutputField(desc="Current reasoning step - what you're thinking about the problem")
-    action: str = dspy.OutputField(desc="Action to take: 'calculate: <expression>' or 'search: <query>' or 'finish: <final_answer>'")
+    action: str = dspy.OutputField(desc="Action to take: 'calculator: <expression>' or 'search: <query>' or 'finish: <final_answer>'")
 
 
 class ReactAgentNode(Node):
     """React agent that reasons and acts iteratively"""
     
     def _create_module(self) -> dspy.Module:
-        return dspy.ChainOfThought(ReactReasoningSignature)
+        # Create a dynamic signature with available tools
+        tools = get_available_tools()
+        tool_descriptions = []
+        for name, tool in tools.items():
+            tool_descriptions.append(f"'{name}: <input>' - {tool.description}")
+        
+        tools_text = " or ".join(tool_descriptions)
+        action_desc = f"Action to take: {tools_text} or 'finish: <final_answer>'"
+        
+        # Create signature with dynamic tool information
+        class DynamicReactSignature(dspy.Signature):
+            """Signature for React reasoning with available tools"""
+            question: str = dspy.InputField(desc="The question to solve")
+            previous_steps: str = dspy.InputField(desc="Previous thoughts, actions, and observations")
+            thought: str = dspy.OutputField(desc="Current reasoning step - what you're thinking about the problem")
+            action: str = dspy.OutputField(desc=action_desc)
+        
+        return dspy.ChainOfThought(DynamicReactSignature)
     
     def process(self, state: Dict[str, Any]) -> Dict[str, Any]:
         """Process one step of React reasoning"""
