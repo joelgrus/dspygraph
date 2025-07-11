@@ -1,10 +1,72 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "dspygraph"
 version = "0.1.0"
-description = "Add your description here"
+description = "A lightweight framework for building graph-based workflows with DSPy nodes"
 readme = "README.md"
 requires-python = ">=3.11"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Joel Grus", email = "joel@joelgrus.com"},
+]
+maintainers = [
+    {name = "Joel Grus", email = "joel@joelgrus.com"},
+]
+keywords = [
+    "dspy",
+    "graph",
+    "workflow",
+    "llm",
+    "language-models",
+    "ai",
+    "machine-learning"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 dependencies = [
     "dspy>=2.6.27",
+]
+
+[project.optional-dependencies]
+dev = [
     "pytest>=8.4.1",
+    "ruff>=0.1.0",
+    "build>=1.2.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/joelgrus/dspygraph"
+Repository = "https://github.com/joelgrus/dspygraph"
+Issues = "https://github.com/joelgrus/dspygraph/issues"
+Documentation = "https://github.com/joelgrus/dspygraph#readme"
+
+[tool.hatch.build.targets.wheel]
+packages = ["dspygraph"]
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "/.github",
+    "/.claude",
+    "/examples",
+    "/tests",
+    "/dist",
+    "compiled_classifier.json",
+    "simple_example.py",
+    "CLAUDE.md",
+    "pytest.ini",
+    ".python-version",
+    "uv.lock"
 ]

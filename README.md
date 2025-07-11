@@ -1,32 +1,100 @@
 # DSPy Graph Framework
 
-An intelligent question-answering system that demonstrates clean architecture for combining DSPy's powerful language model programming with graph-based state management and routing capabilities.
+A lightweight framework for building graph-based workflows with DSPy nodes. Combine DSPy's powerful language model programming with flexible graph execution, conditional routing, and state management.
 
-## What This Project Does
+## Installation
 
-This system creates an intelligent agent that:
-1. **Classifies** incoming questions into categories (factual, creative, tool-use, or unknown)
-2. **Routes** each question to the most appropriate specialized response module
-3. **Generates** tailored responses using different reasoning patterns for each category
-
-### Example Interactions
-
+```bash
+pip install dspygraph
 ```
-Question: "What is the capital of France?"
--> Classified as: factual
--> Routed to: FactualAnswerModule
--> Response: "The capital of France is Paris."
 
-Question: "Write a haiku about programming"
--> Classified as: creative  
--> Routed to: CreativeResponseModule
--> Response: [Generated haiku]
+## Quick Start
 
-Question: "What is 15 x 24?"
--> Classified as: tool_use
--> Routed to: ToolUseModule  
--> Response: [Calculated result]
+```python
+import dspy
+from dspygraph import Node, Graph, START, END
+
+# Configure DSPy
+lm = dspy.LM("openai/gpt-4o-mini")
+dspy.configure(lm=lm)
+
+# Create a simple node
+class QuestionAnswerNode(Node):
+    def _create_module(self):
+        return dspy.ChainOfThought("question -> answer")
+    
+    def process(self, state):
+        result = self.module(question=state["question"])
+        return {"answer": result.answer}
+
+# Create and run a graph
+graph = Graph("MyGraph")
+graph.add_node(QuestionAnswerNode("qa"))
+graph.add_edge(START, "qa")
+graph.add_edge("qa", END)
+
+result = graph.run(question="What is the capital of France?")
+print(result["answer"])
 ```
+
+## Core Concepts
+
+### Node
+The base class for all graph nodes. Extend it to create custom DSPy-powered components:
+
+```python
+class MyNode(Node):
+    def _create_module(self):
+        # Return any DSPy module
+        return dspy.ChainOfThought("input -> output")
+    
+    def process(self, state):
+        # Process the state and return updates
+        result = self.module(input=state["input"])
+        return {"output": result.output}
+```
+
+### Graph
+The execution engine that manages nodes and their connections:
+
+```python
+graph = Graph("MyGraph")
+graph.add_node(my_node)
+graph.add_edge(START, "my_node")
+graph.add_edge("my_node", END)
+
+# Conditional routing
+graph.add_conditional_edges(
+    "classifier",
+    {"route_a": "node_a", "route_b": "node_b"},
+    lambda state: "route_a" if state["condition"] else "route_b"
+)
+```
+
+## Features
+
+- **🔗 Graph-based execution**: Build complex workflows with conditional routing and cycles
+- **🤖 DSPy integration**: Seamlessly integrate with DSPy's language model programming
+- **🔄 State management**: Automatic state passing between nodes with full observability
+- **⚡ Flexible routing**: Support for conditional edges and dynamic graph execution
+- **🛡️ Error handling**: Built-in protection against infinite loops and execution failures
+- **📊 Observability**: Complete execution tracking with timing, token usage, and metadata
+
+## Example Applications
+
+This repository includes complete example applications that demonstrate the framework's capabilities:
+
+### 1. Question Classifier System
+An intelligent agent that:
+- **Classifies** incoming questions into categories (factual, creative, tool-use, or unknown)
+- **Routes** each question to the most appropriate specialized response module  
+- **Generates** tailored responses using different reasoning patterns for each category
+
+### 2. ReAct Agent
+A reasoning and acting agent that:
+- Uses iterative reasoning with tool execution
+- Demonstrates graph-based loops and state management
+- Includes calculator and search tools
 
 ## Key Features
 
