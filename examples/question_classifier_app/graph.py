@@ -1,14 +1,14 @@
 """
-Graph-based workflow for the question classifier application
+Graph-based implementation for the question classifier application
 """
 import dspy
 from dspygraph import Graph, START, END
 from .nodes import QuestionClassifierNode, FactualAnswerNode, CreativeResponseNode, ToolUseNode
 
 
-def create_question_classifier_workflow() -> Graph:
+def create_question_classifier_graph() -> Graph:
     """
-    Create the question classifier workflow as a DSPy graph
+    Create the question classifier graph
     
     Returns:
         Configured Graph ready to run
@@ -86,7 +86,7 @@ def run_question_classifier(question: str) -> dict:
     dspy.configure(lm=lm)
     
     # Create and run graph
-    graph = create_question_classifier_workflow()
+    graph = create_question_classifier_graph()
     
     # Execute with the question
     result = graph.run(question=question)

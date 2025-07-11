@@ -89,7 +89,7 @@ This demonstrates an intelligent routing system that classifies questions and ro
 python -m examples.react_agent.main
 
 # Or run the demonstration
-python -m examples.react_agent.workflow
+python -m examples.react_agent.graph
 ```
 
 This showcases a ReAct (Reasoning + Acting) agent that uses iterative reasoning with tool execution, demonstrating graph-based loops and state management.
@@ -179,12 +179,12 @@ examples/                          # Example applications
 ├── question_classifier_app/       # Question classifier example
 │   ├── main.py                    # Main application entry point
 │   ├── compile_classifier.py      # Compilation script
-│   ├── workflow.py                # Graph workflow definition
+│   ├── graph.py                   # Graph workflow definition
 │   ├── nodes.py                   # Node implementations
 │   └── types.py                   # Application types
 └── react_agent/                   # React agent with tools example
     ├── main.py                    # Interactive React agent
-    ├── workflow.py                # Graph workflow with reasoning loops
+    ├── graph.py                   # Graph workflow with reasoning loops
     ├── nodes.py                   # React agent and tool executor nodes
     ├── tools.py                   # Calculator and search tools
     └── types.py                   # State and result types

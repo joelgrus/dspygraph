@@ -2,7 +2,7 @@
 Main application for the React agent example
 """
 import dspy
-from .workflow import create_react_agent_graph, demonstrate_react_agent
+from .graph import create_react_agent_graph, demonstrate_react_agent
 from .tools import get_available_tools
 
 

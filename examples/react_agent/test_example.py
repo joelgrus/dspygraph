@@ -3,7 +3,7 @@ Simple test script for the React agent example
 """
 import dspy
 from unittest.mock import patch, Mock, MagicMock
-from .workflow import create_react_agent_graph
+from .graph import create_react_agent_graph
 from .nodes import ReactAgentNode, ToolExecutorNode
 
 

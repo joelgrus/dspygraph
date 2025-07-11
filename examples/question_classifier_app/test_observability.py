@@ -3,7 +3,7 @@ Test DSPy's built-in observability features with our graph framework
 """
 import dspy
 from dspy.utils.callback import BaseCallback
-from .workflow import create_question_classifier_workflow
+from .graph import create_question_classifier_graph
 
 
 class DetailedCallback(BaseCallback):
@@ -45,7 +45,7 @@ def test_observability():
     print("=" * 60)
     
     # Create graph
-    graph = create_question_classifier_workflow()
+    graph = create_question_classifier_graph()
     
     # Test with usage tracking
     question = "What is the meaning of life?"

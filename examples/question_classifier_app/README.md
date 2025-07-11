@@ -80,7 +80,7 @@ User Question → QuestionClassifier → Router → Specialized Module → Respo
 - Uses `ReAct` pattern for computational tasks
 - Handles calculations, conversions, and tool-based queries
 
-#### 3. Graph Workflow (`workflow.py`)
+#### 3. Graph Workflow (`graph.py`)
 - Manages state flow between classification and response
 - Handles routing logic based on classification results
 - Provides error handling and fallback responses
@@ -109,7 +109,7 @@ classifier.compile(compiler, trainset, compile_path="compiled_classifier.json")
 question_classifier_app/
 ├── main.py                    # Main application entry point
 ├── compile_classifier.py      # Compilation script
-├── workflow.py                # Graph workflow definition
+├── graph.py                   # Graph workflow definition
 ├── types.py                   # TypedDict definitions
 ├── agents/                    # Agent implementations
 │   ├── classifier.py          # Question classification
@@ -126,7 +126,7 @@ question_classifier_app/
 1. **Update Types**: Add new category to `QuestionCategory` in `types.py`
 2. **Training Data**: Add examples in `compile_classifier.py`
 3. **Create Agent**: Add new agent module in `agents/`
-4. **Update Routing**: Modify routing logic in `workflow.py`
+4. **Update Routing**: Modify routing logic in `graph.py`
 5. **Recompile**: Run `python compile_classifier.py`
 
 ### Modifying Response Modules

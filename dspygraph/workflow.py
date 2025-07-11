@@ -122,9 +122,17 @@ class Graph:
                                 break
                     elif from_node in completed:
                         if condition is None or condition(state):
-                            # For cycles: node can run again if dependency has been satisfied
-                            node_ready = True
-                            break
+                            # If this node hasn't been executed yet, always allow first execution
+                            if node_name not in completed:
+                                node_ready = True
+                                break
+                            # For re-execution (cycles): allow if there are outgoing edges
+                            # This enables cycles but relies on iteration limits for protection
+                            else:
+                                outgoing_edges = [edge for edge in self.edges if edge[0] == node_name]
+                                if outgoing_edges:
+                                    node_ready = True
+                                    break
                 
                 if node_ready:
                     ready.append(node_name)

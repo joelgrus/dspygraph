@@ -94,7 +94,7 @@ examples/                          # Example applications
     ├── main.py                    # Main application entry point
     ├── compile_classifier.py      # Compilation script
     ├── types.py                   # AgentState and QuestionCategory
-    ├── workflow.py                # Graph workflow definition
+    ├── graph.py                   # Graph workflow definition
     └── nodes.py                   # Node implementations
 ```
 

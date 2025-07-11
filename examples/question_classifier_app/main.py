@@ -2,7 +2,7 @@
 Main application using the graph-based DSPy framework
 """
 import dspy
-from .workflow import create_question_classifier_workflow
+from .graph import create_question_classifier_graph
 
 
 def main() -> None:
@@ -16,7 +16,7 @@ def main() -> None:
     
     # Create the graph
     try:
-        graph = create_question_classifier_workflow()
+        graph = create_question_classifier_graph()
     except Exception as e:
         print(f"Failed to create graph: {e}")
         return

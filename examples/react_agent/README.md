@@ -56,7 +56,7 @@ $ python -m examples.react_agent.main
 python -m examples.react_agent.main
 
 # Or run the demonstration
-python -m examples.react_agent.workflow
+python -m examples.react_agent.graph
 ```
 
 ## Available Tools
@@ -138,7 +138,7 @@ Process:
 ```
 react_agent/
 ├── main.py                   # Interactive application
-├── workflow.py               # Graph workflow definition  
+├── graph.py                  # Graph workflow definition  
 ├── nodes.py                  # React agent and tool executor nodes
 ├── tools.py                  # Calculator and search tools
 ├── types.py                  # Type definitions
