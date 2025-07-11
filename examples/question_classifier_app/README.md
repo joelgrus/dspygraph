@@ -1,6 +1,6 @@
 # Question Classifier App
 
-An intelligent question-answering system that demonstrates advanced DSPy-LangGraph integration with classification, routing, and specialized response modules.
+An intelligent question-answering system that demonstrates advanced DSPy graph integration with classification, routing, and specialized response modules.
 
 ## What This App Does
 
@@ -39,7 +39,7 @@ Final Result: Whiskers twitching in the light, A feline friend both day and nigh
 ### Prerequisites
 - Python 3.11+
 - OpenAI API key (set as environment variable)
-- dspy-langgraph framework installed
+- dspygraph framework installed
 
 ### Running the App
 
@@ -80,7 +80,7 @@ User Question → QuestionClassifier → Router → Specialized Module → Respo
 - Uses `ReAct` pattern for computational tasks
 - Handles calculations, conversions, and tool-based queries
 
-#### 3. LangGraph Workflow (`graph.py`)
+#### 3. Graph Workflow (`workflow.py`)
 - Manages state flow between classification and response
 - Handles routing logic based on classification results
 - Provides error handling and fallback responses
@@ -109,7 +109,7 @@ classifier.compile(compiler, trainset, compile_path="compiled_classifier.json")
 question_classifier_app/
 ├── main.py                    # Main application entry point
 ├── compile_classifier.py      # Compilation script
-├── graph.py                   # LangGraph workflow definition
+├── workflow.py                # Graph workflow definition
 ├── types.py                   # TypedDict definitions
 ├── agents/                    # Agent implementations
 │   ├── classifier.py          # Question classification
@@ -126,15 +126,15 @@ question_classifier_app/
 1. **Update Types**: Add new category to `QuestionCategory` in `types.py`
 2. **Training Data**: Add examples in `compile_classifier.py`
 3. **Create Agent**: Add new agent module in `agents/`
-4. **Update Routing**: Modify routing logic in `graph.py`
+4. **Update Routing**: Modify routing logic in `workflow.py`
 5. **Recompile**: Run `python compile_classifier.py`
 
 ### Modifying Response Modules
 
-Each response module is a standard DSPy-LangGraph `AgentNode`:
+Each response module is a standard DSPy graph `Node`:
 
 ```python
-class CustomResponseModule(AgentNode[AgentState]):
+class CustomResponseModule(Node):
     def _create_module(self) -> dspy.Module:
         return dspy.ChainOfThought("question -> response")
     

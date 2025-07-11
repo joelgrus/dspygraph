@@ -1,12 +1,12 @@
 """
-Main application using the graph-based DSPy workflow
+Main application using the graph-based DSPy framework
 """
 import dspy
 from .workflow import create_question_classifier_workflow
 
 
 def main() -> None:
-    """Main application entry point using DSPy graph workflow"""
+    """Main application entry point using DSPy graph framework"""
     # Configure DSPy 
     lm = dspy.LM("openai/gpt-4o-mini")
     dspy.configure(lm=lm)
@@ -14,16 +14,16 @@ def main() -> None:
     # Enable DSPy observability
     dspy.enable_logging()
     
-    # Create the workflow
+    # Create the graph
     try:
-        workflow = create_question_classifier_workflow()
+        graph = create_question_classifier_workflow()
     except Exception as e:
-        print(f"Failed to create workflow: {e}")
+        print(f"Failed to create graph: {e}")
         return
     
-    # Print workflow structure
-    print("Workflow Structure:")
-    print(workflow.visualize())
+    # Print graph structure
+    print("Graph Structure:")
+    print(graph.visualize())
     print()
     
     # Run test cases
@@ -38,13 +38,13 @@ def main() -> None:
         print(f"Question: {question}")
         
         try:
-            # Execute workflow with full observability
-            result = workflow.run(question=question)
+            # Execute graph with full observability
+            result = graph.run(question=question)
             
             print(f"✅ Final Result: {result.get('response', 'No response generated')}")
             
-            # Show workflow metadata
-            metadata = result.get('_workflow_metadata', {})
+            # Show graph metadata
+            metadata = result.get('_graph_metadata', {})
             print(f"⏱️  Execution time: {metadata.get('execution_time', 0):.3f}s")
             print(f"📊 Total usage: {metadata.get('total_usage', {})}")
             print(f"🔄 Execution order: {' -> '.join(metadata.get('execution_order', []))}")

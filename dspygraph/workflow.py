@@ -1,5 +1,5 @@
 """
-DSPy Workflow graph execution engine
+DSPy Graph execution engine
 """
 import time
 import uuid
@@ -9,27 +9,27 @@ import dspy
 
 from .node import Node
 
-# Module-level constants for workflow control
+# Module-level constants for graph control
 START = "__START__"
 END = "__END__"
 
 
-class Workflow:
+class Graph:
     """
-    A workflow execution engine for DSPy nodes with graph-based orchestration
+    A graph execution engine for DSPy nodes with arbitrary topology support
     """
     
-    def __init__(self, name: str = "Workflow"):
+    def __init__(self, name: str = "Graph"):
         self.name = name
-        self.workflow_id = str(uuid.uuid4())
+        self.graph_id = str(uuid.uuid4())
         self.nodes: Dict[str, Node] = {}
         self.edges: List[tuple] = []
         self.start_nodes: Set[str] = set()
         self._execution_count = 0
         
-    def add_node(self, node: Node) -> 'Workflow':
+    def add_node(self, node: Node) -> 'Graph':
         """
-        Add a node to the workflow
+        Add a node to the graph
         
         Args:
             node: DSPyNode instance to add
@@ -38,14 +38,14 @@ class Workflow:
             Self for method chaining
         """
         if node.name in self.nodes:
-            raise ValueError(f"Node '{node.name}' already exists in workflow")
+            raise ValueError(f"Node '{node.name}' already exists in graph")
             
         self.nodes[node.name] = node
         print(f"[{self.name}] Added node: {node.name}")
         return self
     
     def add_edge(self, from_node: str, to_node: str, 
-                 condition: Optional[Callable[[Dict[str, Any]], bool]] = None) -> 'Workflow':
+                 condition: Optional[Callable[[Dict[str, Any]], bool]] = None) -> 'Graph':
         """
         Add an edge between nodes
         
@@ -73,7 +73,7 @@ class Workflow:
     
     def add_conditional_edges(self, from_node: str, 
                             conditions: Dict[str, str],
-                            condition_fn: Callable[[Dict[str, Any]], str]) -> 'Workflow':
+                            condition_fn: Callable[[Dict[str, Any]], str]) -> 'Graph':
         """
         Add conditional edges based on state evaluation
         
@@ -117,12 +117,12 @@ class Workflow:
         return ready
     
     def _validate_graph(self) -> None:
-        """Validate the workflow graph for common issues"""
+        """Validate the graph for common issues"""
         if not self.nodes:
-            raise ValueError("Workflow has no nodes")
+            raise ValueError("Graph has no nodes")
             
         if not self.start_nodes and self.edges:
-            raise ValueError("Workflow has edges but no start nodes defined")
+            raise ValueError("Graph has edges but no start nodes defined")
             
         # Check for cycles (simple detection)
         visited = set()
@@ -146,17 +146,17 @@ class Workflow:
         for node_name in self.nodes:
             if node_name not in visited:
                 if has_cycle(node_name):
-                    raise ValueError("Workflow contains cycles")
+                    raise ValueError("Graph contains cycles")
     
     def run(self, **initial_state) -> Dict[str, Any]:
         """
-        Execute the workflow
+        Execute the graph
         
         Args:
             **initial_state: Initial state values
             
         Returns:
-            Final workflow state
+            Final graph state
         """
         execution_id = str(uuid.uuid4())
         self._execution_count += 1
@@ -181,10 +181,10 @@ class Workflow:
             node_execution_order = []
             total_usage = defaultdict(int)
             
-            # Track workflow metadata
-            state["_workflow_metadata"] = {
-                "workflow_name": self.name,
-                "workflow_id": self.workflow_id,
+            # Track graph metadata
+            state["_graph_metadata"] = {
+                "graph_name": self.name,
+                "graph_id": self.graph_id,
                 "execution_id": execution_id,
                 "execution_count": self._execution_count,
                 "start_time": start_time
@@ -220,7 +220,7 @@ class Workflow:
                         
                         # Update state with node outputs, protecting metadata
                         for key, value in node_outputs.items():
-                            if key != "_workflow_metadata":  # Protect workflow metadata
+                            if key != "_graph_metadata":  # Protect graph metadata
                                 state[key] = value
                         
                         # Track execution
@@ -239,7 +239,7 @@ class Workflow:
             execution_time = time.time() - start_time
             
             # Add final metadata
-            state["_workflow_metadata"].update({
+            state["_graph_metadata"].update({
                 "execution_order": node_execution_order,
                 "execution_time": execution_time,
                 "total_usage": dict(total_usage),
@@ -260,8 +260,8 @@ class Workflow:
             print(f"\n[{self.name}] Execution failed after {execution_time:.3f}s: {e}")
             
             # Add failure metadata
-            if "_workflow_metadata" in state:
-                state["_workflow_metadata"].update({
+            if "_graph_metadata" in state:
+                state["_graph_metadata"].update({
                     "execution_time": execution_time,
                     "success": False,
                     "error": str(e)
@@ -270,8 +270,8 @@ class Workflow:
             raise
     
     def visualize(self) -> str:
-        """Generate a simple text visualization of the workflow"""
-        lines = [f"DSPy Workflow: {self.name}"]
+        """Generate a simple text visualization of the graph"""
+        lines = [f"DSPy Graph: {self.name}"]
         lines.append(f"Nodes: {len(self.nodes)}")
         lines.append(f"Edges: {len(self.edges)}")
         lines.append("")
@@ -299,4 +299,4 @@ class Workflow:
         return False
     
     def __repr__(self) -> str:
-        return f"Workflow(name='{self.name}', nodes={len(self.nodes)}, edges={len(self.edges)})"
+        return f"Graph(name='{self.name}', nodes={len(self.nodes)}, edges={len(self.edges)})"

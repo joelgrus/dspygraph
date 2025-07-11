@@ -2,19 +2,19 @@
 Graph-based workflow for the question classifier application
 """
 import dspy
-from dspygraph import Workflow, START, END
+from dspygraph import Graph, START, END
 from .nodes import QuestionClassifierNode, FactualAnswerNode, CreativeResponseNode, ToolUseNode
 
 
-def create_question_classifier_workflow() -> Workflow:
+def create_question_classifier_workflow() -> Graph:
     """
     Create the question classifier workflow as a DSPy graph
     
     Returns:
-        Configured Workflow ready to run
+        Configured Graph ready to run
     """
-    # Create workflow
-    workflow = Workflow("QuestionClassifier")
+    # Create graph
+    graph = Graph("QuestionClassifier")
     
     # Create and add nodes
     classifier = QuestionClassifierNode("classifier")
@@ -22,14 +22,14 @@ def create_question_classifier_workflow() -> Workflow:
     creative = CreativeResponseNode("creative_response") 
     tool_use = ToolUseNode("tool_use")
     
-    # Add nodes to workflow
-    workflow.add_node(classifier)
-    workflow.add_node(factual)
-    workflow.add_node(creative)
-    workflow.add_node(tool_use)
+    # Add nodes to graph
+    graph.add_node(classifier)
+    graph.add_node(factual)
+    graph.add_node(creative)
+    graph.add_node(tool_use)
     
     # Add explicit START edge
-    workflow.add_edge(START, "classifier")
+    graph.add_edge(START, "classifier")
     
     # Define routing logic
     def route_by_classification(state):
@@ -45,7 +45,7 @@ def create_question_classifier_workflow() -> Workflow:
             return "unknown"
     
     # Add conditional edges from classifier to response nodes
-    workflow.add_conditional_edges(
+    graph.add_conditional_edges(
         "classifier",
         {
             "factual": "factual_answer",
@@ -57,45 +57,45 @@ def create_question_classifier_workflow() -> Workflow:
     )
     
     # Add explicit END edges for each response type
-    workflow.add_edge("factual_answer", END)
-    workflow.add_edge("creative_response", END)
-    workflow.add_edge("tool_use", END)
+    graph.add_edge("factual_answer", END)
+    graph.add_edge("creative_response", END)
+    graph.add_edge("tool_use", END)
     
     # Load compiled classifier
     try:
         classifier.load_compiled("compiled_classifier.json")
-        print("Loaded compiled classifier for workflow")
+        print("Loaded compiled classifier for graph")
     except:
         print("Warning: No compiled classifier found. Run compile_classifier.py first")
     
-    return workflow
+    return graph
 
 
 def run_question_classifier(question: str) -> dict:
     """
-    Run the question classifier workflow on a single question
+    Run the question classifier graph on a single question
     
     Args:
         question: The question to classify and answer
         
     Returns:
-        Complete workflow execution result
+        Complete graph execution result
     """
     # Configure DSPy
     lm = dspy.LM("openai/gpt-4o-mini")
     dspy.configure(lm=lm)
     
-    # Create and run workflow
-    workflow = create_question_classifier_workflow()
+    # Create and run graph
+    graph = create_question_classifier_workflow()
     
     # Execute with the question
-    result = workflow.run(question=question)
+    result = graph.run(question=question)
     
     return result
 
 
 if __name__ == "__main__":
-    # Test the workflow
+    # Test the graph
     test_questions = [
         "What is the capital of France?",
         "What is 123 + 456?", 

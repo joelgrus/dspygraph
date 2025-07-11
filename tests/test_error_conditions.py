@@ -6,7 +6,7 @@ import dspy
 from unittest.mock import Mock, patch
 from typing import Dict, Any
 
-from dspygraph import Workflow, Node, START, END
+from dspygraph import Graph, Node, START, END
 
 
 class FailingNode(Node):
@@ -57,16 +57,16 @@ class TestErrorConditions:
         mock_track_usage.return_value.__enter__.return_value = mock_usage
         mock_track_usage.return_value.__exit__.return_value = None
         
-        workflow = Workflow("test")
+        graph = Graph("test")
         failing_node = FailingNode("failing", fail_on_process=True)
         
         with patch('builtins.print'):
-            workflow.add_node(failing_node)
-            workflow.add_edge(START, "failing")
-            workflow.add_edge("failing", END)
+            graph.add_node(failing_node)
+            graph.add_edge(START, "failing")
+            graph.add_edge("failing", END)
         
         with pytest.raises(RuntimeError, match="Node processing failed"):
-            workflow.run(input="test")
+            graph.run(input="test")
     
     def test_node_creation_failure(self):
         """Test handling of node creation failures"""
@@ -75,15 +75,15 @@ class TestErrorConditions:
     
     def test_workflow_no_start_nodes(self):
         """Test workflow with no start nodes"""
-        workflow = Workflow("test")
+        graph = Graph("test")
         node1 = DeadlockNode("node1")
         node2 = DeadlockNode("node2")
         
         with patch('builtins.print'):
-            workflow.add_node(node1)
-            workflow.add_node(node2)
+            graph.add_node(node1)
+            graph.add_node(node2)
             # No START edges and no legacy is_start
-            workflow.add_edge("node1", "node2")
+            graph.add_edge("node1", "node2")
         
         # Should fail validation since there are edges but no start nodes
         with patch('dspy.track_usage') as mock_track:
@@ -93,14 +93,14 @@ class TestErrorConditions:
             mock_track.return_value.__exit__.return_value = None
             
             with pytest.raises(ValueError, match="has edges but no start nodes"):
-                workflow.run(input="test")
+                graph.run(input="test")
     
     def test_workflow_empty_run(self):
         """Test running empty workflow"""
-        workflow = Workflow("empty")
+        graph = Graph("empty")
         
         with pytest.raises(ValueError, match="has no nodes"):
-            workflow.run(input="test")
+            graph.run(input="test")
     
     def test_missing_required_state(self):
         """Test node that expects missing state"""
@@ -113,12 +113,12 @@ class TestErrorConditions:
                 required_value = state["required_key"]  # This could raise KeyError
                 return {"result": required_value}
         
-        workflow = Workflow("test")
+        graph = Graph("test")
         node = RequiringNode("requiring")
         
         with patch('builtins.print'):
-            workflow.add_node(node)
-            workflow.add_edge(START, "requiring")
+            graph.add_node(node)
+            graph.add_edge(START, "requiring")
         
         with patch('dspy.track_usage') as mock_track:
             mock_usage = Mock()
@@ -127,7 +127,7 @@ class TestErrorConditions:
             mock_track.return_value.__exit__.return_value = None
             
             with pytest.raises(KeyError, match="required_key"):
-                workflow.run(input="test")  # No required_key provided
+                graph.run(input="test")  # No required_key provided
     
     def test_node_returns_invalid_output(self):
         """Test node that returns invalid output"""
@@ -138,12 +138,12 @@ class TestErrorConditions:
             def process(self, state):
                 return "not a dict"  # Should return dict
         
-        workflow = Workflow("test")
+        graph = Graph("test")
         node = InvalidOutputNode("invalid")
         
         with patch('builtins.print'):
-            workflow.add_node(node)
-            workflow.add_edge(START, "invalid")
+            graph.add_node(node)
+            graph.add_edge(START, "invalid")
         
         with patch('dspy.track_usage') as mock_track:
             mock_usage = Mock()
@@ -153,25 +153,25 @@ class TestErrorConditions:
             
             # This should cause an error when trying to update state
             with pytest.raises(AttributeError):
-                workflow.run(input="test")
+                graph.run(input="test")
     
     def test_circular_dependency_detection(self):
         """Test detection of circular dependencies"""
-        workflow = Workflow("test")
+        graph = Graph("test")
         node1 = DeadlockNode("node1")
         node2 = DeadlockNode("node2")
         node3 = DeadlockNode("node3")
         
         with patch('builtins.print'):
-            workflow.add_node(node1)
-            workflow.add_node(node2)
-            workflow.add_node(node3)
+            graph.add_node(node1)
+            graph.add_node(node2)
+            graph.add_node(node3)
             
             # Create circular dependency
-            workflow.add_edge(START, "node1")
-            workflow.add_edge("node1", "node2")
-            workflow.add_edge("node2", "node3")
-            workflow.add_edge("node3", "node1")  # Creates cycle
+            graph.add_edge(START, "node1")
+            graph.add_edge("node1", "node2")
+            graph.add_edge("node2", "node3")
+            graph.add_edge("node3", "node1")  # Creates cycle
         
         with patch('dspy.track_usage') as mock_track:
             mock_usage = Mock()
@@ -180,23 +180,23 @@ class TestErrorConditions:
             mock_track.return_value.__exit__.return_value = None
             
             with pytest.raises(ValueError, match="contains cycles"):
-                workflow.run(input="test")
+                graph.run(input="test")
     
     def test_conditional_edge_with_invalid_router(self):
         """Test conditional edges with router that raises exceptions"""
         def failing_router(state):
             raise ValueError("Router failed")
         
-        workflow = Workflow("test")
+        graph = Graph("test")
         node1 = DeadlockNode("node1")
         node2 = DeadlockNode("node2")
         
         with patch('builtins.print'):
-            workflow.add_node(node1)
-            workflow.add_node(node2)
+            graph.add_node(node1)
+            graph.add_node(node2)
             
-            workflow.add_edge(START, "node1")
-            workflow.add_conditional_edges(
+            graph.add_edge(START, "node1")
+            graph.add_conditional_edges(
                 "node1",
                 {"success": "node2"},
                 failing_router
@@ -209,23 +209,23 @@ class TestErrorConditions:
             mock_track.return_value.__exit__.return_value = None
             
             with pytest.raises(ValueError, match="Router failed"):
-                workflow.run(input="test")
+                graph.run(input="test")
     
     def test_edge_to_nonexistent_conditional_target(self):
         """Test conditional routing to non-existent target"""
         def router_to_missing(state):
             return "missing_target"
         
-        workflow = Workflow("test")
+        graph = Graph("test")
         node1 = DeadlockNode("node1")
         
         with patch('builtins.print'):
-            workflow.add_node(node1)
-            workflow.add_edge(START, "node1")
+            graph.add_node(node1)
+            graph.add_edge(START, "node1")
             
             # This should fail since we're trying to add edge to nonexistent node
             with pytest.raises(ValueError, match="Target node 'nonexistent' not found"):
-                workflow.add_conditional_edges(
+                graph.add_conditional_edges(
                     "node1",
                     {"missing_target": "nonexistent"},  # nonexistent node
                     router_to_missing
@@ -278,25 +278,25 @@ class TestErrorConditions:
         mock_track_usage.return_value.__enter__.return_value = mock_usage
         mock_track_usage.return_value.__exit__.return_value = None
         
-        workflow = Workflow("test")
+        graph = Graph("test")
         good_node = DeadlockNode("good")
         bad_node = FailingNode("bad", fail_on_process=True)
         
         with patch('builtins.print'):
-            workflow.add_node(good_node)
-            workflow.add_node(bad_node)
-            workflow.add_edge(START, "good")
-            workflow.add_edge("good", "bad")
+            graph.add_node(good_node)
+            graph.add_node(bad_node)
+            graph.add_edge(START, "good")
+            graph.add_edge("good", "bad")
         
         try:
-            workflow.run(input="test")
+            graph.run(input="test")
             assert False, "Should have raised exception"
         except RuntimeError:
             # Expected failure
             pass
         
-        # Workflow should have incremented execution count even on failure
-        assert workflow._execution_count == 1
+        # Graph should have incremented execution count even on failure
+        assert graph._execution_count == 1
     
     def test_state_key_collision(self):
         """Test handling of state key collisions"""
@@ -306,15 +306,15 @@ class TestErrorConditions:
             
             def process(self, state):
                 # Try to overwrite metadata
-                return {"_workflow_metadata": "hacked"}
+                return {"_graph_metadata": "hacked"}
         
-        workflow = Workflow("test")
+        graph = Graph("test")
         node = CollidingNode("colliding")
         
         with patch('builtins.print'):
-            workflow.add_node(node)
-            workflow.add_edge(START, "colliding")
-            workflow.add_edge("colliding", END)
+            graph.add_node(node)
+            graph.add_edge(START, "colliding")
+            graph.add_edge("colliding", END)
         
         with patch('dspy.track_usage') as mock_track:
             mock_usage = Mock()
@@ -322,9 +322,9 @@ class TestErrorConditions:
             mock_track.return_value.__enter__.return_value = mock_usage
             mock_track.return_value.__exit__.return_value = None
             
-            result = workflow.run(input="test")
+            result = graph.run(input="test")
             
-            # Workflow metadata should be protected from node outputs
-            assert isinstance(result["_workflow_metadata"], dict)
-            assert result["_workflow_metadata"]["workflow_name"] == "test"
+            # Graph metadata should be protected from node outputs
+            assert isinstance(result["_graph_metadata"], dict)
+            assert result["_graph_metadata"]["graph_name"] == "test"
             # The node's attempted override should be ignored

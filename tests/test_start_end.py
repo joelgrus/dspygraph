@@ -6,7 +6,7 @@ import dspy
 from unittest.mock import Mock, patch
 from typing import Dict, Any
 
-from dspygraph import Workflow, Node, START, END
+from dspygraph import Graph, Node, START, END
 
 
 class MockNode(Node):
@@ -56,19 +56,19 @@ class TestStartEndBehavior:
         mock_track_usage.return_value.__enter__.return_value = mock_usage
         mock_track_usage.return_value.__exit__.return_value = None
         
-        workflow = Workflow("test")
+        graph = Graph("test")
         start_node = MockNode("start", {"step": "started"})
         
         with patch('builtins.print'):
-            workflow.add_node(start_node)
-            workflow.add_edge(START, "start")
-            workflow.add_edge("start", END)
+            graph.add_node(start_node)
+            graph.add_edge(START, "start")
+            graph.add_edge("start", END)
         
-        result = workflow.run(input="test")
+        result = graph.run(input="test")
         
         assert result["step"] == "started"
-        assert result["_workflow_metadata"]["execution_order"] == ["start"]
-        assert "start" in workflow.start_nodes
+        assert result["_graph_metadata"]["execution_order"] == ["start"]
+        assert "start" in graph.start_nodes
     
     @patch('dspy.track_usage') 
     def test_multiple_start_nodes(self, mock_track_usage):
@@ -78,26 +78,26 @@ class TestStartEndBehavior:
         mock_track_usage.return_value.__enter__.return_value = mock_usage
         mock_track_usage.return_value.__exit__.return_value = None
         
-        workflow = Workflow("test")
+        graph = Graph("test")
         start1 = MockNode("start1", {"path1": "data1"})
         start2 = MockNode("start2", {"path2": "data2"})
         merger = MockNode("merger", {"merged": "combined"})
         
         with patch('builtins.print'):
-            workflow.add_node(start1)
-            workflow.add_node(start2) 
-            workflow.add_node(merger)
+            graph.add_node(start1)
+            graph.add_node(start2) 
+            graph.add_node(merger)
             
             # Both start from START
-            workflow.add_edge(START, "start1")
-            workflow.add_edge(START, "start2")
+            graph.add_edge(START, "start1")
+            graph.add_edge(START, "start2")
             
             # Both feed into merger
-            workflow.add_edge("start1", "merger")
-            workflow.add_edge("start2", "merger")
-            workflow.add_edge("merger", END)
+            graph.add_edge("start1", "merger")
+            graph.add_edge("start2", "merger")
+            graph.add_edge("merger", END)
         
-        result = workflow.run(input="test")
+        result = graph.run(input="test")
         
         # All data should be present
         assert result["path1"] == "data1"
@@ -105,7 +105,7 @@ class TestStartEndBehavior:
         assert result["merged"] == "combined"
         
         # Execution order should include all nodes
-        execution_order = result["_workflow_metadata"]["execution_order"]
+        execution_order = result["_graph_metadata"]["execution_order"]
         assert "start1" in execution_order
         assert "start2" in execution_order
         assert "merger" in execution_order
@@ -119,7 +119,7 @@ class TestStartEndBehavior:
         mock_track_usage.return_value.__enter__.return_value = mock_usage
         mock_track_usage.return_value.__exit__.return_value = None
         
-        workflow = Workflow("test")
+        graph = Graph("test")
         router = MockNode("router", {"decision": "terminate"})
         processor = MockNode("processor", {"processed": "data"})
         
@@ -128,29 +128,29 @@ class TestStartEndBehavior:
             return "end" if decision == "terminate" else "continue"
         
         with patch('builtins.print'):
-            workflow.add_node(router)
-            workflow.add_node(processor)
+            graph.add_node(router)
+            graph.add_node(processor)
             
-            workflow.add_edge(START, "router")
-            workflow.add_conditional_edges(
+            graph.add_edge(START, "router")
+            graph.add_conditional_edges(
                 "router",
                 {"end": END, "continue": "processor"},
                 routing_logic
             )
-            workflow.add_edge("processor", END)
+            graph.add_edge("processor", END)
         
         # Test early termination
-        result = workflow.run(input="test")
+        result = graph.run(input="test")
         assert result["decision"] == "terminate"
         assert "processed" not in result  # Should not reach processor
-        assert result["_workflow_metadata"]["execution_order"] == ["router"]
+        assert result["_graph_metadata"]["execution_order"] == ["router"]
         
         # Test continuation by changing router output
         router.output_data = {"decision": "continue"}
-        result2 = workflow.run(input="test2")
+        result2 = graph.run(input="test2")
         assert result2["decision"] == "continue"
         assert result2["processed"] == "data"
-        assert result2["_workflow_metadata"]["execution_order"] == ["router", "processor"]
+        assert result2["_graph_metadata"]["execution_order"] == ["router", "processor"]
     
     @patch('dspy.track_usage')
     def test_multiple_end_paths(self, mock_track_usage):
@@ -160,7 +160,7 @@ class TestStartEndBehavior:
         mock_track_usage.return_value.__enter__.return_value = mock_usage
         mock_track_usage.return_value.__exit__.return_value = None
         
-        workflow = Workflow("test")
+        graph = Graph("test")
         splitter = MockNode("splitter", {"route": "path1"})
         path1 = MockNode("path1", {"result": "path1_result"})
         path2 = MockNode("path2", {"result": "path2_result"})
@@ -169,80 +169,80 @@ class TestStartEndBehavior:
             return state.get("route", "path1")
         
         with patch('builtins.print'):
-            workflow.add_node(splitter)
-            workflow.add_node(path1)
-            workflow.add_node(path2)
+            graph.add_node(splitter)
+            graph.add_node(path1)
+            graph.add_node(path2)
             
-            workflow.add_edge(START, "splitter")
-            workflow.add_conditional_edges(
+            graph.add_edge(START, "splitter")
+            graph.add_conditional_edges(
                 "splitter",
                 {"path1": "path1", "path2": "path2"},
                 router
             )
             # Both paths end at END
-            workflow.add_edge("path1", END)
-            workflow.add_edge("path2", END)
+            graph.add_edge("path1", END)
+            graph.add_edge("path2", END)
         
         # Test path1
-        result1 = workflow.run(input="test")
+        result1 = graph.run(input="test")
         assert result1["result"] == "path1_result"
-        assert "path1" in result1["_workflow_metadata"]["execution_order"]
-        assert "path2" not in result1["_workflow_metadata"]["execution_order"]
+        assert "path1" in result1["_graph_metadata"]["execution_order"]
+        assert "path2" not in result1["_graph_metadata"]["execution_order"]
         
         # Test path2
         splitter.output_data = {"route": "path2"}
-        result2 = workflow.run(input="test")
+        result2 = graph.run(input="test")
         assert result2["result"] == "path2_result"
-        assert "path2" in result2["_workflow_metadata"]["execution_order"]
-        assert "path1" not in result2["_workflow_metadata"]["execution_order"]
+        assert "path2" in result2["_graph_metadata"]["execution_order"]
+        assert "path1" not in result2["_graph_metadata"]["execution_order"]
     
     def test_start_edge_validation(self):
         """Test START edge validation"""
-        workflow = Workflow("test")
+        graph = Graph("test")
         node1 = MockNode("node1")
         
         with patch('builtins.print'):
-            workflow.add_node(node1)
+            graph.add_node(node1)
             
             # Should work - START to existing node
-            workflow.add_edge(START, "node1")
+            graph.add_edge(START, "node1")
             
             # Should fail - START to non-existent node
             with pytest.raises(ValueError, match="Target node 'missing' not found"):
-                workflow.add_edge(START, "missing")
+                graph.add_edge(START, "missing")
     
     def test_end_edge_validation(self):
         """Test END edge validation"""
-        workflow = Workflow("test")
+        graph = Graph("test")
         node1 = MockNode("node1")
         
         with patch('builtins.print'):
-            workflow.add_node(node1)
+            graph.add_node(node1)
             
             # Should work - existing node to END
-            workflow.add_edge("node1", END)
+            graph.add_edge("node1", END)
             
             # Should fail - non-existent node to END  
             with pytest.raises(ValueError, match="Source node 'missing' not found"):
-                workflow.add_edge("missing", END)
+                graph.add_edge("missing", END)
     
     def test_start_node_tracking(self):
         """Test that START edges properly track start nodes"""
-        workflow = Workflow("test")
+        graph = Graph("test")
         node1 = MockNode("node1")
         node2 = MockNode("node2")
         
         with patch('builtins.print'):
-            workflow.add_node(node1)
-            workflow.add_node(node2)
+            graph.add_node(node1)
+            graph.add_node(node2)
             
             # Add START edges
-            workflow.add_edge(START, "node1")
-            workflow.add_edge(START, "node2")
+            graph.add_edge(START, "node1")
+            graph.add_edge(START, "node2")
         
-        assert "node1" in workflow.start_nodes
-        assert "node2" in workflow.start_nodes
-        assert len(workflow.start_nodes) == 2
+        assert "node1" in graph.start_nodes
+        assert "node2" in graph.start_nodes
+        assert len(graph.start_nodes) == 2
     
     @patch('dspy.track_usage')
     def test_implicit_vs_explicit_end(self, mock_track_usage):
@@ -252,36 +252,36 @@ class TestStartEndBehavior:
         mock_track_usage.return_value.__enter__.return_value = mock_usage
         mock_track_usage.return_value.__exit__.return_value = None
         
-        workflow = Workflow("test")
+        graph = Graph("test")
         node1 = MockNode("node1", {"step": "first"})
         node2 = MockNode("node2", {"step": "second"})
         
         with patch('builtins.print'):
-            workflow.add_node(node1)
-            workflow.add_node(node2)
+            graph.add_node(node1)
+            graph.add_node(node2)
             
-            workflow.add_edge(START, "node1")
-            workflow.add_edge("node1", "node2")
+            graph.add_edge(START, "node1")
+            graph.add_edge("node1", "node2")
             # node2 has no outgoing edges - implicit end
         
-        result = workflow.run(input="test")
+        result = graph.run(input="test")
         
         # Should execute both nodes and end naturally
         assert result["step"] == "second"  # node2 overwrites node1
-        execution_order = result["_workflow_metadata"]["execution_order"]
+        execution_order = result["_graph_metadata"]["execution_order"]
         assert execution_order == ["node1", "node2"]
     
     def test_workflow_visualization_with_start_end(self):
         """Test workflow visualization includes START/END"""
-        workflow = Workflow("test")
+        graph = Graph("test")
         node1 = MockNode("node1")
         
         with patch('builtins.print'):
-            workflow.add_node(node1)
-            workflow.add_edge(START, "node1")
-            workflow.add_edge("node1", END)
+            graph.add_node(node1)
+            graph.add_edge(START, "node1")
+            graph.add_edge("node1", END)
         
-        viz = workflow.visualize()
+        viz = graph.visualize()
         
         # Should show START marker
         assert "node1 (START)" in viz
@@ -297,7 +297,7 @@ class TestStartEndBehavior:
         mock_track_usage.return_value.__enter__.return_value = mock_usage
         mock_track_usage.return_value.__exit__.return_value = None
         
-        workflow = Workflow("complex")
+        graph = Graph("complex")
         
         # Create nodes
         init1 = MockNode("init1", {"init": "data1"})
@@ -309,37 +309,37 @@ class TestStartEndBehavior:
             return "early_end" if state.get("decision") == "end_early" else "continue"
         
         with patch('builtins.print'):
-            workflow.add_node(init1)
-            workflow.add_node(init2)
-            workflow.add_node(processor)
-            workflow.add_node(finalizer)
+            graph.add_node(init1)
+            graph.add_node(init2)
+            graph.add_node(processor)
+            graph.add_node(finalizer)
             
             # Multiple start points
-            workflow.add_edge(START, "init1")
-            workflow.add_edge(START, "init2")
+            graph.add_edge(START, "init1")
+            graph.add_edge(START, "init2")
             
             # Converge to processor
-            workflow.add_edge("init1", "processor")
-            workflow.add_edge("init2", "processor")
+            graph.add_edge("init1", "processor")
+            graph.add_edge("init2", "processor")
             
             # Conditional routing from processor
-            workflow.add_conditional_edges(
+            graph.add_conditional_edges(
                 "processor",
                 {"early_end": END, "continue": "finalizer"},
                 router
             )
             
             # Normal end
-            workflow.add_edge("finalizer", END)
+            graph.add_edge("finalizer", END)
         
-        result = workflow.run(input="test")
+        result = graph.run(input="test")
         
         # Should have parallel init, then early termination
         assert result["init"] == "data2"  # Last init wins
         assert result["decision"] == "end_early"
         assert "final" not in result  # Should not reach finalizer
         
-        execution_order = result["_workflow_metadata"]["execution_order"]
+        execution_order = result["_graph_metadata"]["execution_order"]
         assert "init1" in execution_order
         assert "init2" in execution_order  
         assert "processor" in execution_order

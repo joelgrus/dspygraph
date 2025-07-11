@@ -4,7 +4,7 @@ Type definitions for the question classifier application
 from typing import TypedDict, Literal
 
 class AgentState(TypedDict):
-    """State structure for the question classifier agent workflow"""
+    """State structure for the question classifier agent graph"""
     question: str
     classification: str
     response: str

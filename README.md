@@ -1,6 +1,6 @@
-# DSPy + LangGraph Integration Framework
+# DSPy Graph Framework
 
-An intelligent question-answering system that demonstrates clean architecture for combining DSPy's powerful language model programming with LangGraph's state management and routing capabilities.
+An intelligent question-answering system that demonstrates clean architecture for combining DSPy's powerful language model programming with graph-based state management and routing capabilities.
 
 ## What This Project Does
 
@@ -31,7 +31,7 @@ Question: "What is 15 x 24?"
 ## Key Features
 
 ### Clean Architecture
-- **Reusable Framework**: dspygraph/ provides a base AgentNode class that can be used for any DSPy project
+- **Reusable Framework**: dspygraph/ provides a base Node class that can be used for any DSPy project
 - **Application-Specific Code**: question_classifier_app/ contains the specific implementations for this question-answering system
 - **Clear Separation**: Framework concerns are separated from application logic
 
@@ -70,7 +70,7 @@ uv sync
 python simple_example.py
 ```
 
-This shows basic DSPy-LangGraph integration with a single agent that answers questions.
+This shows basic DSPy graph integration with a single agent that answers questions.
 
 #### Question Classifier App (Advanced Example)
 ```bash
@@ -92,7 +92,7 @@ User Question -> QuestionClassifier -> Router -> Specialized Module -> Response
 ```
 
 1. **Question Classification**: DSPy module analyzes the question and assigns a category
-2. **Intelligent Routing**: LangGraph routes to the appropriate response module
+2. **Intelligent Routing**: Graph routes to the appropriate response module
 3. **Specialized Processing**: Each module uses different reasoning patterns:
    - **Factual**: Chain-of-thought reasoning for factual questions
    - **Creative**: Optimized for creative content generation
@@ -101,10 +101,10 @@ User Question -> QuestionClassifier -> Router -> Specialized Module -> Response
 
 ### Framework Design
 
-The project showcases a reusable pattern for DSPy + LangGraph integration:
+The project showcases a reusable pattern for DSPy + Graph integration:
 
-- **AgentNode**: Base class that unifies DSPy modules with LangGraph nodes
-- **Clean Interfaces**: Each agent implements both DSPy module creation and LangGraph state processing
+- **Node**: Base class that unifies DSPy modules with graph nodes
+- **Clean Interfaces**: Each node implements both DSPy module creation and graph state processing
 - **Compilation Support**: Built-in support for DSPy's optimization system
 
 ### Compilation API
@@ -139,9 +139,9 @@ agent.save_compiled("my_model.json")
 The dspygraph/ framework can be reused for entirely different applications:
 
 ```python
-from dspygraph import AgentNode, configure_dspy
+from dspygraph import Node, configure_dspy
 
-class MyCustomAgent(AgentNode[MyState]):
+class MyCustomAgent(Node):
     def _create_module(self):
         return dspy.ChainOfThought("input -> output")
     
@@ -154,13 +154,13 @@ class MyCustomAgent(AgentNode[MyState]):
 
 ### Dependencies
 - **DSPy**: Language model programming framework
-- **LangGraph**: State graph framework for complex workflows
+- **Graph Engine**: State graph framework for complex workflows
 - **OpenAI**: Language model provider
 
 ### Project Structure
 ```
 dspygraph/                         # Reusable framework
-├── base.py                        # AgentNode base class
+├── base.py                        # Node base class
 ├── config.py                      # DSPy configuration
 └── constants.py                   # Framework constants
 
@@ -180,10 +180,10 @@ simple_example.py                  # Basic framework demo
 This project demonstrates patterns for:
 - Clean architecture in AI systems
 - DSPy best practices
-- LangGraph integration
+- Graph integration
 - Type-safe Python development
 
-Feel free to use this as a template for your own DSPy + LangGraph projects!
+Feel free to use this as a template for your own DSPy + Graph projects!
 
 ## License
 

@@ -1,5 +1,5 @@
 """
-Test DSPy's built-in observability features with our graph workflow
+Test DSPy's built-in observability features with our graph framework
 """
 import dspy
 from dspy.utils.callback import BaseCallback
@@ -30,7 +30,7 @@ class DetailedCallback(BaseCallback):
 
 
 def test_observability():
-    """Test the workflow with full DSPy observability enabled"""
+    """Test the graph with full DSPy observability enabled"""
     
     # Configure DSPy with observability
     lm = dspy.LM("openai/gpt-4o-mini")
@@ -41,11 +41,11 @@ def test_observability():
     callback = DetailedCallback()
     dspy.settings.configure(callbacks=[callback])
     
-    print("🔬 Testing DSPy Graph Workflow with Full Observability")
+    print("🔬 Testing DSPy Graph Framework with Full Observability")
     print("=" * 60)
     
-    # Create workflow
-    workflow = create_question_classifier_workflow()
+    # Create graph
+    graph = create_question_classifier_workflow()
     
     # Test with usage tracking
     question = "What is the meaning of life?"
@@ -54,7 +54,7 @@ def test_observability():
     print("-" * 40)
     
     with dspy.track_usage() as usage:
-        result = workflow.run(question=question)
+        result = graph.run(question=question)
     
     print("\n📊 Usage Summary:")
     print(f"Total Usage: {usage.get_total_tokens()}")

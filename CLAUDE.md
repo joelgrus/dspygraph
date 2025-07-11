@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This project demonstrates a clean architecture for integrating DSPy's intelligent modules with LangGraph's state management and routing capabilities. The system creates an intelligent agent that classifies user questions and routes them to appropriate specialized response modules.
+This project demonstrates a clean architecture for integrating DSPy's intelligent modules with graph-based state management and routing capabilities. The system creates an intelligent agent that classifies user questions and routes them to appropriate specialized response modules.
 
 ## Architecture Design
 
@@ -13,9 +13,9 @@ This project demonstrates a clean architecture for integrating DSPy's intelligen
 The codebase is organized with clean separation between reusable framework code and application-specific implementations:
 
 **Framework (dspygraph/):**
-- AgentNode base class: Unified abstraction for DSPy modules
+- Node base class: Unified abstraction for DSPy modules + graph nodes
 - configure_dspy(): Shared DSPy configuration utilities
-- Reusable across any DSPy project
+- Reusable across any DSPy + Graph project
 
 **Application (examples/question_classifier_app/):**
 - Specific agent implementations (classifier, factual, creative, tool_use)
@@ -31,10 +31,10 @@ The codebase is organized with clean separation between reusable framework code 
 - FactualAnswerModule: Provides factual answers using ChainOfThought
 - CreativeResponseModule: Generates creative responses
 
-**Workflow Management:**
-- AgentState: TypedDict defining workflow state (question, classification, response, tool_output)
-- QuestionClassifierWorkflow: Manual workflow implementation with routing logic
-- Workflow orchestrates the entire process without external dependencies
+**Graph Management:**
+- AgentState: TypedDict defining graph state (question, classification, response, tool_output)
+- route_question(): Conditional routing based on classification results
+- Graph StateGraph orchestrates the entire workflow
 
 **Compilation API:**
 - agent.compile(compiler, trainset, compile_path=None): Compile agent with DSPy compiler
@@ -78,14 +78,14 @@ python main.py
 
 ## Dependencies
 - `dspy>=2.6.27`: Core DSPy framework for language model programming
-- `langgraph>=0.5.1`: State graph framework for workflow management
+- Python 3.11+ required
 - Python 3.11+ required
 
 ## Code Structure
 
 ```
 dspygraph/                         # Reusable framework
-├── base.py                        # AgentNode base class
+├── base.py                        # Node base class
 ├── config.py                      # DSPy configuration utilities
 └── constants.py                   # Framework constants
 
@@ -94,22 +94,15 @@ examples/                          # Example applications
     ├── main.py                    # Main application entry point
     ├── compile_classifier.py      # Compilation script
     ├── types.py                   # AgentState and QuestionCategory
-    ├── routing.py                 # Route logic
-    ├── agents/                    # Agent implementations
-    │   ├── classifier.py
-    │   ├── factual.py
-    │   ├── creative.py
-    │   └── tool_use.py
-    └── compilation/               # Training data and metrics
-        ├── metrics.py
-        └── training.py
+    ├── workflow.py                # Graph workflow definition
+    └── nodes.py                   # Node implementations
 ```
 
 ## Important Files
-- examples/question_classifier_app/main.py: Main application entry point with agent workflow
+- examples/question_classifier_app/main.py: Main application entry point with graph workflow
 - examples/question_classifier_app/compile_classifier.py: Compiles and optimizes the question classifier
 - examples/question_classifier_app/compiled_classifier.json: Serialized compiled classifier (generated)
-- dspygraph/: Reusable framework for DSPy integration
+- dspygraph/: Reusable framework for DSPy + Graph integration
 - examples/question_classifier_app/: Application-specific implementations
 
 ## Usage Examples
