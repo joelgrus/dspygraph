@@ -2,13 +2,18 @@
 """
 Compilation script for the question classifier using graph nodes
 """
+
+from typing import Any
+
 import dspy
 from dspy.teleprompt import BootstrapFewShot
-from typing import Any, Optional
+
 from .nodes import QuestionClassifierNode
 
 
-def classification_metric(pred_object: Any, true_category_str: str, trace: Optional[Any] = None) -> bool:
+def classification_metric(
+    pred_object: Any, true_category_str: str, trace: Any | None = None
+) -> bool:
     """Metric for evaluating question classification accuracy"""
     return pred_object.category == true_category_str
 
@@ -31,20 +36,20 @@ TRAINING_DATA = [
 def compile_classifier() -> None:
     """Compile the question classifier node"""
     print("Compiling QuestionClassifier node...")
-    
+
     # Configure DSPy for compilation
     lm = dspy.LM("openai/gpt-4o-mini")
     dspy.configure(lm=lm)
-    
+
     # Create classifier node
     classifier = QuestionClassifierNode("classifier")
-    
+
     # Convert training data to DSPy Examples
     trainset = [
         dspy.Example(question=question, category=category).with_inputs("question")
         for question, category in TRAINING_DATA
     ]
-    
+
     # Create compiler and compile
     compiler = BootstrapFewShot(metric=classification_metric)
     classifier.compile(compiler, trainset, compile_path="compiled_classifier.json")
